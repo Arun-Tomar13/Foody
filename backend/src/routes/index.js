@@ -10,7 +10,9 @@ const orderRoute = require('./order.routes.js');
 const addressRoute = require('./address.routes.js');
 const transactionRoute = require('./transaction.routes.js');
 const { auth } = require("../middlewares/auth.middleware.js");
-const getRoles = require('../controllers/role.controller.js')
+const getRoles = require('../controllers/role.controller.js');
+const { checkRoles } = require('../middlewares/role.middleware.js');
+const { role } = require('../utils/constant.js');
 
 const router = express.Router()
 
@@ -24,6 +26,6 @@ router.use('/category',auth(),categoryRoute)
 router.use('/cart-item',auth(),cartItemRoute)
 router.use('/order',auth(),orderRoute)
 router.use('/address',auth(),addressRoute)
-router.use('/transaction',auth(),transactionRoute)
+router.use('/transaction',auth(),checkRoles([role.customer]),transactionRoute)
 
 module.exports= router

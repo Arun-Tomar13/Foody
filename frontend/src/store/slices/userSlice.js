@@ -4,7 +4,7 @@ import {
   getUserProfile,
   updateUserProfile,
   logout,
-} from "../../lib/api";
+} from "../../lib/api/userApi";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { startLoading, stopLoading } from "./commonSlice";
 
@@ -107,7 +107,7 @@ const UserSlice = createSlice({
         state.error = null;
       })
       .addCase(logoutUser.fulfilled, (state, action) => {
-         state.loading = false;
+        state.loading = false;
         action.payload.success
           ? (state.user = {})
           : (state.error = action.payload);
@@ -121,9 +121,17 @@ const UserSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        action.payload.success
-          ? (state.user = action.payload.data.updatedUser[0])
-          : (state.error = action.payload);
+        if (action.payload.success) {
+          state.user = action.payload.data.updatedUser[0];
+          localStorage.setItem(
+            "Bearer",
+            JSON.stringify(action.payload.data.accessToken),
+          );
+          localStorage.setItem(
+            "role",
+            JSON.stringify(action.payload.data.role),
+          );
+        } else state.error = action.payload;
       })
       .addCase(loginUser.rejected, (state) => {
         state.loading = false;

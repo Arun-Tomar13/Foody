@@ -7,6 +7,7 @@ const getRolesById = async (res,role_id)=>{
 try {
     const result = await db(tableConstant.role).where({id:role_id})
     return result;
+    
 } catch (error) {
     return sendResponse({
       res,

@@ -4,6 +4,10 @@ import axios from "axios";
 export const axiosInstance = axios.create({
     baseURL:'http://localhost:8000/api',
     headers:{
-        Authorization:JSON.parse(localStorage.getItem('Bearer')) || null,
+        Authorization:JSON.parse(localStorage.getItem('Bearer') || null),
     }
+})
+
+export const axiosInstanceWithoutAuth = axios.create({
+    baseURL:'http://localhost:8000/api'
 })

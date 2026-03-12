@@ -13,19 +13,19 @@ const Transaction = () => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const dispatch = useDispatch();
 
-  const { error,loading,transactionList, credit, debit, balance } = useSelector(
+  const { error,loading,transactionList, credit, debit, balance,successMessage } = useSelector(
     (state) => state.transaction,
   );
-console.log(openSnackbar);
+console.log(successMessage);
 
   useEffect(() => {
-      if (error) {
+      if (error || successMessage) {
         setOpenSnackbar(true);
         setTimeout(() => {
           setOpenSnackbar(false);
         }, 2000);
       }
-    }, [error]);
+    }, [error,successMessage]);
 
   useEffect(() => {
     const fatchTransactions = async () => {
@@ -115,8 +115,8 @@ console.log(openSnackbar);
             />
             </Grid>
             {/* Error Text */}
-            {error && (
-              <CustomSnackbar type='error' variant="filled" open={openSnackbar} message={error.message} />
+            {(error || successMessage) && (
+              <CustomSnackbar type={error ? 'error' : 'success'} variant="filled" open={openSnackbar} message={error ? error.message : successMessage} />
             )}
           </div>
           <DataGrid

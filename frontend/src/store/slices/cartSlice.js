@@ -75,6 +75,7 @@ const initialState = {
   itemList: [],
   error: null,
   loading: null,
+  successMessage:null
 };
 
 const cartSlice = createSlice({
@@ -86,9 +87,11 @@ const cartSlice = createSlice({
       .addCase(addCartItem.pending, (state) => {
         state.loading = true;
         state.error = false;
+        state.successMessage=null;
       })
       .addCase(addCartItem.fulfilled, (state, action) => {
         if (action.payload.success) {
+          state.successMessage=action.payload.message
           if (action.payload.data.updated) {
             state.itemList = state.itemList.map((item) => {
               if (item.id == action.payload.data.newCartItem[0].id) {
@@ -147,10 +150,12 @@ const cartSlice = createSlice({
       .addCase(decreaseCartItem.pending, (state) => {
         state.loading = true;
         state.error = false;
+        state.successMessage = null;
       })
       .addCase(decreaseCartItem.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload.success) {
+          state.successMessage=action.payload.message
           if (action.payload.data.del == 0) {
             state.itemList = state.itemList.map((item) => {
               if (action.payload.data.id == item.id) {

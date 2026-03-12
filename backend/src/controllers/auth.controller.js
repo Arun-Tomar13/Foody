@@ -184,7 +184,7 @@ const loginUser = async (req, res) => {
       res,
       statusCode: StatusCodes.OK,
       message: "user logged in sucessfully",
-      data: { updatedUser, accessToken },
+      data: { updatedUser, accessToken,role:roleIs[0].name },
     });
   } catch (error) {
     return sendResponse({

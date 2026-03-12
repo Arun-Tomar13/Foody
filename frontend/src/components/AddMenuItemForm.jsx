@@ -48,13 +48,11 @@ console.log(errors);
   }, []);
 
   const onSubmit = async (data) => {
-    console.log("data", data);
-    // console.log(fn);
-
+    console.log(data);
+    
+    
     const formData = new FormData()
     if(file) formData.append("image",file)
-    console.log(file);
-    
 
     for(let key in data){
       formData.append(`${key}`,data[key])

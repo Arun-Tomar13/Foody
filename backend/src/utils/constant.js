@@ -57,6 +57,12 @@ const number_Regrex = new RegExp('[0-9]');
 
 const menuBulkCSVFormateHeader = ['price','category','name','description','available','type','restaurant']
 const categoryBulkCSVFormateHeader = ['name','description','restaurant']
- 
 
-module.exports = {tableConstant,responseMessage,formatSqlTimestamp,number_Regrex,menuBulkCSVFormateHeader,categoryBulkCSVFormateHeader}
+const role={
+    customer:'customer',
+    admin:'admin',
+    restaurant_owner:'restaurant owner',
+    delivery_partner:'delivery partner',
+}
+
+module.exports = {tableConstant,responseMessage,formatSqlTimestamp,number_Regrex,menuBulkCSVFormateHeader,categoryBulkCSVFormateHeader,role}

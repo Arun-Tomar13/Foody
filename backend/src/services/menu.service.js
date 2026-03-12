@@ -100,6 +100,7 @@ const getMenuItemById = async (res, itemId) => {
 
 const updateMenuItem = async (res, data) => {
   try {
+    
     const result = await db(tableConstant.menu)
       .where({ id: data.id })
       .update(data);

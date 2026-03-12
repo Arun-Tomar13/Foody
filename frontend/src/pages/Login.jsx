@@ -47,10 +47,6 @@ const Login = () => {
     console.log("login result", result);
 
     if (result.payload.success) {
-      localStorage.setItem(
-        "Bearer",
-        JSON.stringify(result.payload.data.accessToken),
-      );
       navigate("/");
     }
   };

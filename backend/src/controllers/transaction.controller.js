@@ -12,7 +12,7 @@ const topUpInTrasaction = async (req, res) => {
       return sendResponse({
         res,
         statusCode: StatusCodes.BAD_REQUEST,
-        message: "user does not have cart",
+        message: "user does not exists",
         success: false,
       });
       
@@ -39,7 +39,7 @@ const topUpInTrasaction = async (req, res) => {
     return sendResponse({
       res,
       statusCode: StatusCodes.OK,
-      message: "order created successfully",
+      message: `topup of $${amount} is successfully`,
       data: transaction,
     });
   } catch (error) {

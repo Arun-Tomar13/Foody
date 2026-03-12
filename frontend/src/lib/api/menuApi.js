@@ -16,8 +16,8 @@ const deleteMenuItemApi = async (itemid)=>{
     return result
 }
 
-const updateMenuApi = async ({formData})=>{
-    const result = await axiosInstance.patch('/menu',formData,{headers: { "Content-Type": "multipart/form-data"}});
+const updateMenuApi = async ({formData,id})=>{
+    const result = await axiosInstance.patch(`/menu`,formData,{headers: { "Content-Type": "multipart/form-data"}});
     return result
 }
 

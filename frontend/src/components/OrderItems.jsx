@@ -98,8 +98,15 @@ const OrderItems = () => {
   return (
     <div className='p-2 d-flex flex-column justify-content-center' >
         { orderItemList &&  
-        <div className='d-flex flex-column gap-5' >
-        { successful ?  <h2 className='text-success' >Congratulations your order placed successfully 🎉</h2> : <h2 className='text-primary' >Order History</h2> }
+        <div className='d-flex flex-column gap-5 align-items-center' >
+         { successful 
+         ?  
+         <div className='d-flex flex-column align-items-center' >
+          <video width='310px' src="../public/Successful.mp4" autoPlay loop  />
+          <h2 className='text-success' >Congratulations your order placed successfully 🎉</h2>
+         </div>
+
+         : <h2 className='text-primary' >Order History</h2> }
         <div className='d-flex flex-column gap-3' >
         <h4 className='text-secondary' >items you have ordered</h4>
         <DataGrid

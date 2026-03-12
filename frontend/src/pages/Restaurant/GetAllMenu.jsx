@@ -268,7 +268,7 @@ const GetAllMenu = () => {
 
       <Grid>
         {/* update dialogbox */}
-        <DialogBox
+       { menuItem && <DialogBox
           open={openForUpdate}
           onClose={handleClose}
           title="update item"
@@ -280,7 +280,7 @@ const GetAllMenu = () => {
               close={handleClose}
             />
           }
-        />
+        />}
 
         {/* MenuList */}
         <DataGrid

@@ -19,9 +19,9 @@ import SelectInput from "../components/InputFields/SelectInput";
 import { useNavigate } from "react-router";
 import { Link } from "react-router";
 import { useEffect } from "react";
-import { getRoles, register } from "../lib/api";
 import { useState } from "react";
 import AFormProvider from "../components/FormProvider";
+import { getRoles } from "../lib/api/userApi";
 
 // yup
 const schema = yup
@@ -83,7 +83,6 @@ const Register = () => {
     const getRole = async () => {
       const roles = await getRoles();
       setRoles(roles.data.data);
-      console.log(roles);
     };
     getRole();
   }, []);

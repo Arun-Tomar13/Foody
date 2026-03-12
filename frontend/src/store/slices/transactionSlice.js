@@ -7,7 +7,8 @@ const initialState = {
   debit:0,
   credit:0,
   error: null,
-  loading:null
+  loading:null,
+  successMessage:null,
 };
 
 export const topUp = createAsyncThunk(
@@ -51,6 +52,7 @@ const transactionSlice = createSlice({
         state.loading = false;
 
         if(action.payload.success){ 
+            state.successMessage=action.payload.message
             state.transactionList.push(action.payload.data[0])
             state.balance +=  action.payload.data[0].credit
             state.credit += action.payload.data[0].credit

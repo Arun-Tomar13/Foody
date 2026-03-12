@@ -1,5 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
 const restaurantService = require("../services/restaurant.service");
+const categoryService = require("../services/category.service");
 const {
   responseMessage,
   tableConstant,
@@ -29,12 +30,18 @@ const addCategory = async (req, res) => {
         message: "restaurant does not exists",
         success: false,
       });
+      
+      const hasCategoryategory = await categoryService.getCategory(res,{name,restaurant_id})
 
-    const add = await db(tableConstant.category).insert({
-      name,
-      description,
-      restaurant_id,
-    });
+      if (hasCategoryategory.length > 0)
+        return sendResponse({
+          res,
+          statusCode: StatusCodes.BAD_REQUEST,
+          message: "category already exists",
+          success: false,
+        });
+
+    const add = await categoryService.createCategory(res,{name,description,restaurant_id})
 
     if (add.length == 0)
       return sendResponse({
@@ -44,9 +51,7 @@ const addCategory = async (req, res) => {
         success: false,
       });
 
-    const category = await db(tableConstant.category)
-      .where({ id: add[0] })
-      .select("id", "name", "description", "isAvailable");
+    const category = await categoryService.getCategory(res,{id:add[0]})
 
     return sendResponse({
       res,
@@ -63,6 +68,7 @@ const addCategory = async (req, res) => {
     });
   }
 };
+
 // Add Category in bulk
 const addCategoryInBulk = async (req, res) => {
   try {
@@ -252,7 +258,7 @@ const addCategoryInBulk = async (req, res) => {
 
     for (let row of inputData) {
       try {
-        const id = await db(tableConstant.category).insert({
+        const id = await categoryService.createCategory(res,{
           name: row.name,
           description: row.description,
           restaurant_id: row.restaurant,
@@ -274,9 +280,7 @@ const addCategoryInBulk = async (req, res) => {
 
     if (restaurant_id) {
       for (let id of ids) {
-        const data = await db(tableConstant.category)
-          .where({ id })
-          .select("id", "name", "description", "isAvailable");
+        const data = await categoryService.getCategory(res,{id})
         results.push(data[0]);
       }
     }
@@ -302,7 +306,7 @@ const updateCategory = async (req, res) => {
   try {
     const { id, name, description, isAvailable } = req.body;
 
-    const isRestaurant = await db(tableConstant.category).where({ id });
+    const isRestaurant = await categoryService.getCategory(res,{ id });
 
     if (isRestaurant.length == 0)
       return sendResponse({
@@ -312,12 +316,7 @@ const updateCategory = async (req, res) => {
         success: false,
       });
 
-    const add = await db(tableConstant.category).where({ id }).update({
-      name,
-      description,
-      isAvailable,
-    });
-
+    const add = await categoryService.updateCategory(res,{id,name,description,isAvailable})
     if (add.length == 0)
       return sendResponse({
         res,
@@ -326,9 +325,7 @@ const updateCategory = async (req, res) => {
         success: false,
       });
 
-    const category = await db(tableConstant.category)
-      .where({ id })
-      .select("id", "name", "description", "isAvailable");
+    const category = await categoryService.getCategory(res,{id})
 
     return sendResponse({
       res,
@@ -351,7 +348,7 @@ const deleteCategory = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const isCategory = await db(tableConstant.category).where({ id });
+    const isCategory = await categoryService.getCategory(res,{id});
 
     if (isCategory.length == 0)
       return sendResponse({
@@ -361,7 +358,7 @@ const deleteCategory = async (req, res) => {
         success: false,
       });
 
-    const add = await db(tableConstant.category).where({ id }).del();
+    const add = await categoryService.removeCategoryById(res,{id})
 
     if (!add)
       return sendResponse({
@@ -391,11 +388,8 @@ const deleteCategory = async (req, res) => {
 const getCategoryById = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log("id", id);
 
-    const category = await db(tableConstant.category)
-      .where({ id })
-      .select("id", "name", "description", "isAvailable");
+    const category = await categoryService.getCategory(res,{id})
 
     if (category.length == 0)
       return sendResponse({
@@ -435,9 +429,7 @@ const getAllCategorybyRestaurantId = async (req, res) => {
         success: false,
       });
 
-    const category = await db(tableConstant.category)
-      .where({ restaurant_id: id })
-      .select("id", "name", "description", "isAvailable");
+    const category = await categoryService.getCategory(res,{restaurant_id: id });
 
     return sendResponse({
       res,

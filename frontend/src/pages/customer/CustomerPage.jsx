@@ -8,12 +8,13 @@ import {
   CardActions,
   CardContent,
   CardMedia,
+  CircularProgress,
   Grid,
   TextField,
   Typography,
 } from "@mui/material";
 import { addCartItem } from "../../store/slices/cartSlice";
-import { CircleDot } from "lucide-react";
+import { CircleDot, LoaderPinwheel } from "lucide-react";
 import CustomSnackbar from "../../components/CustomSnackbar";
 
 const CustomerPage = () => {
@@ -33,18 +34,22 @@ const CustomerPage = () => {
 
   const { menuList, error, loading } = useSelector((state) => state.menu);
   const user = useSelector((state) => state.users?.user);
+  const {successMessage} = useSelector((state) => state.cart);
 
   useEffect(() => {
-    if (error) {
+    if (error ||successMessage) {
       setOpen(true);
       setTimeout(() => {
         setOpen(false);
-      }, 2000);
+      }, 1000);
     }
-  }, [error]);
+  }, [error, successMessage]);
 
   return (
-    <Grid  container direction='column' >
+    <div >
+    { !loading 
+    ?
+      <Grid  container direction='column' >
       <Grid container justifyContent="space-between">
         {/* Search */}
         <h3> welcome {user?.name} wanna eat </h3>
@@ -62,7 +67,7 @@ const CustomerPage = () => {
               <Grid key={item.id} boxShadow={3} width="180px">
                 <Card
                   key={item.id}
-                  className="d-flex flex-column align-items-center"
+                  className="d-flex h-100 flex-column align-items-center"
                 >
                   <CardActionArea>
                     <CardMedia
@@ -113,19 +118,24 @@ const CustomerPage = () => {
           <img 
           className="w-50"
           src="https://static.vecteezy.com/system/resources/previews/023/833/970/non_2x/search-no-result-data-information-not-found-concept-illustration-flat-design-eps10-modern-graphic-element-for-landing-page-empty-state-ui-infographic-icon-vector.jpg" alt="" />
-          <Typography>No result found for item</Typography>
+          <Typography>No result found for {searchQuery}</Typography>
         </Grid>
       )}
       {/* Error Text */}
-      {error && (
+      {(successMessage || error) && (
         <CustomSnackbar
-          type="error"
+          type={error ? "error" : 'success' }
           variant="filled"
           open={open}
-          message={error.message}
+          message={error ? error.message : successMessage}
         />
       )}
     </Grid>
+    :
+    <Grid ><CircularProgress/></Grid>
+    }
+
+    </div>
   );
 };
 

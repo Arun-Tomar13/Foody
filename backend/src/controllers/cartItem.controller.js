@@ -50,7 +50,7 @@ console.log(newCartItem);
     return sendResponse({
       res,
       statusCode: StatusCodes.OK,
-      message: "successfully get the user profile",
+      message: "item added successfully",
       data: {newCartItem,updated}
     });
   } catch (error) {

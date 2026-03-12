@@ -355,11 +355,14 @@ const bulkUploadItemToMenu = async (req, res) => {
   }
 };
 
+
 // Update Menu
 const updateMenuItem = async (req, res) => {
   try {
     // const userid = req.user;
-    let { id, name, description, type, price, image, category_id } = req.body;
+    let { id, name, description, type, price, image } = req.body;
+    console.log(req.body);
+    
 
     // const hasRestraurant =
     //   await restaurantService.getRestaurantbyOwnerId(userid);
@@ -390,10 +393,7 @@ const updateMenuItem = async (req, res) => {
       description,
       type,
       image,
-      category_id,
     });
-
-    console.log("hi");
 
     if (!isitemUpdat)
       return sendResponse({
