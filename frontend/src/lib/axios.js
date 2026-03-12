@@ -11,3 +11,11 @@ export const axiosInstance = axios.create({
 export const axiosInstanceWithoutAuth = axios.create({
     baseURL:'http://localhost:8000/api'
 })
+axiosInstance.interceptors.request.use(config => {
+  const Bearer = JSON.parse(localStorage.getItem('Bearer'));
+  
+  if (Bearer) {
+    config.headers.Authorization = Bearer;
+  }
+  return config;
+});

@@ -1,20 +1,30 @@
 const { StatusCodes } = require("http-status-codes");
 const db = require("../config/db.config");
-const ApiResponse = require("../utils/ApiResponse");
-const ApiError = require("../utils/ApiError");
+const {
+  rolesConstant,
+  moduleConstant,
+  actionConstant,
+  tableConstant,
+} = require("../utils/constant");
+const sendResponse = require("../utils/response");
 
 // Add Permission
 const addPermissions = async (req, res) => {
   try {
-    const { roleId, moduleId, description } = req.body;
+    const { role, module, action, description } = req.body;
 
-    const isPermissionExists = await db("permissions").where({
-      role_id: roleId,
-      module_id: moduleId,
+    console.log( rolesConstant[role],
+       moduleConstant[module],
+       actionConstant[action]);
+    
+
+    const isPermissionExists = await db(tableConstant.permission).where({
+      role_id: rolesConstant[role],
+      module_id: moduleConstant[module],
+      action_id: actionConstant[action],
     });
-    console.log(isPermissionExists);
 
-    if (!isPermissionExists)
+    if (isPermissionExists.length)
       return sendResponse({
         res,
         statusCode: StatusCodes.BAD_REQUEST,
@@ -22,9 +32,10 @@ const addPermissions = async (req, res) => {
         success: false,
       });
 
-    const result = await db("permissions").insert({
-      role_id: roleId,
-      module_id: moduleId,
+    const result = await db(tableConstant.permission).insert({
+      role_id: rolesConstant[role],
+      module_id: moduleConstant[module],
+      action_id: actionConstant[action],
       description,
     });
 
@@ -46,11 +57,9 @@ const addPermissions = async (req, res) => {
 // Remove Permission
 const removePermission = async (req, res) => {
   try {
-    const { roleId, moduleId } = req.body;
+    const { permission_id } = req.body;
 
-    const result = await db("permissions")
-      .where({ role_id: roleId, module_id: moduleId })
-      .del();
+    const result = await db(tableConstant.permission).where({ id: permission_id }).del();
 
     if (!result)
       return sendResponse({
@@ -78,8 +87,8 @@ const removePermission = async (req, res) => {
 // Read Permission
 const readPermission = async (req, res) => {
   try {
-    const result = await db("permissions");
- 
+    const result = await db(tableConstant.permission);
+
     if (result.length == 0)
       return sendResponse({
         res,

@@ -61,7 +61,7 @@ const getAllTransaction = async (req, res) => {
       return sendResponse({
         res,
         statusCode: StatusCodes.BAD_REQUEST,
-        message: "user does not have cart",
+        message: "user does not exists",
         success: false,
       });
 
@@ -72,7 +72,7 @@ const getAllTransaction = async (req, res) => {
     return sendResponse({
       res,
       statusCode: StatusCodes.OK,
-      message: "order created successfully",
+      message: "transaction fetched successfully",
       data: {transactions,total},
     });
   } catch (error) {

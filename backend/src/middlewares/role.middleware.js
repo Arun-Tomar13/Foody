@@ -1,8 +1,14 @@
 const sendResponse = require("../utils/response");
 const { StatusCodes } = require("http-status-codes");
-const roleService = require("../services/role.services");
+const {
+  tableConstant,
+  rolesConstant,
+  moduleConstant,
+  actionConstant,
+} = require("../utils/constant");
+const db = require("../config/db.config");
 
-const checkRoles = (allowedRoles) => {
+const checkPermission = (module_id, action_id) => {
   return async (req, res, next) => {
     try {
       const role_id = req.role;
@@ -14,17 +20,18 @@ const checkRoles = (allowedRoles) => {
           success: false,
         });
 
-      const role = await roleService.getRolesById(res, role_id);
-      
-      if (role.length==0)
-        return sendResponse({
-          res,
-          statusCode: StatusCodes.UNAUTHORIZED,
-          message: "role does not exists",
-          success: false,
-        });
+      if (role_id == rolesConstant.admin) {next(); return };
 
-      if (role[0].name =='admin' || !allowedRoles.includes(role[0].name))
+      console.log(role_id,module_id,action_id);
+      
+
+      const isHasPermission = await db(tableConstant.permission).where({
+        role_id,
+        module_id,
+        action_id,
+      });
+
+      if (isHasPermission.length == 0)
         return sendResponse({
           res,
           statusCode: StatusCodes.UNAUTHORIZED,
@@ -44,4 +51,4 @@ const checkRoles = (allowedRoles) => {
   };
 };
 
-module.exports = { checkRoles };
+module.exports =  checkPermission ;

@@ -13,14 +13,16 @@ import RestaurantDashboard from "./pages/Restaurant/RestaurantDashboard";
 import Transaction from "./pages/customer/Transactions";
 import Dashboard from "./components/charts/Dashboard";
 import Unauthorized from "./pages/Unauthorized";
+import { useSelector } from "react-redux";
 
 function App() {
   const ProtectedRoute = ({ allowedRoles, children }) => {
-    const userRole = JSON.parse(localStorage.getItem("role"));
-    console.log(allowedRoles.includes(userRole),allowedRoles,userRole);
+    const userRole = useSelector((state)=>state?.users?.user?.role)
+    // const userRole = JSON.parse(localStorage.getItem("role"));
+    console.log('a',allowedRoles.includes(userRole),allowedRoles,userRole);
     
 
-    if (userRole == "admin" || allowedRoles.includes(userRole))
+    // if (userRole == "admin" || allowedRoles.includes(userRole))
       return children;
 
     return <Navigate to="/unauthorized" />;
@@ -53,7 +55,7 @@ function App() {
           path="restaurant/:id/category/:categoryid"
           element={
             <ProtectedRoute allowedRoles={["restaurant owner"]}>
-              <Restaurant />
+              <CategoryPage />
             </ProtectedRoute>
           }
         />
@@ -89,6 +91,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="*" element={<Unauthorized />} />
         <Route path="unauthorized" element={<Unauthorized />} />
       </Route>
     </Routes>

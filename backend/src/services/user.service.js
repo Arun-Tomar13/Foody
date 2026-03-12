@@ -57,7 +57,7 @@ const getUserById = async (res,userId) => {
   try {
     const userData = await db("users").where({
       id: userId,
-    }).select('name','email','age','address','country','phone','gender','user_image')
+    }).select('name','email','age','address','country','phone','gender','user_image','role_id as role')
   
     return userData;
   } catch (error) {

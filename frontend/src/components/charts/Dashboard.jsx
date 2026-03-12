@@ -67,8 +67,6 @@ const Dashboard = () => {
 
     fetchRestro();
   }, []);
-
-  console.log("revenuePerday" , revenuePerday);
   
 
   return (

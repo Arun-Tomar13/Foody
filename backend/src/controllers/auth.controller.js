@@ -88,7 +88,7 @@ const registerUser = async (req, res) => {
         address,
         newuser[0],
       );
-      
+
       if (addaddress.length == 0) {
         return sendResponse({
           res,
@@ -98,7 +98,6 @@ const registerUser = async (req, res) => {
         });
       }
     }
-
 
     return sendResponse({
       res,
@@ -139,7 +138,7 @@ const loginUser = async (req, res) => {
         statusCode: StatusCodes.UNAUTHORIZED,
         message: "incorrect password",
         success: false,
-      }); 
+      });
 
     const roleIs = await roleService.getRolesById(res, user[0].role_id);
     let cart = null;
@@ -171,20 +170,12 @@ const loginUser = async (req, res) => {
       });
 
     const updatedUser = await userService.getUserById(res, user[0].id);
-
-    if (updatedUser.length == 0)
-      sendResponse({
-        res,
-        statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-        message: "internal server error",
-        success: false,
-      });
-
+      
     return sendResponse({
       res,
       statusCode: StatusCodes.OK,
       message: "user logged in sucessfully",
-      data: { updatedUser, accessToken,role:roleIs[0].name },
+      data: { updatedUser, accessToken, role: roleIs[0].name },
     });
   } catch (error) {
     return sendResponse({

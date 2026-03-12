@@ -1,7 +1,7 @@
 const { StatusCodes } = require('http-status-codes')
 const userService =  require('../services/user.service')
 const  sendResponse  = require('../utils/response')
-const { tableConstant } = require('../utils/constant')
+const { tableConstant, rolesConstant } = require('../utils/constant')
 const db = require('../config/db.config')
 
 const getRoles = async (req,res)=>{
@@ -14,7 +14,7 @@ try {
         success:false
       }); 
   
-      user = user.filter((data)=> data.id!=1)
+      user = user.filter((data)=> data.id!=rolesConstant.admin)
       return sendResponse({res,statusCode:StatusCodes.OK,message:"role fetched succesfully",data:user})
 } catch (error) {
   return sendResponse({res,statusCode:StatusCodes.BAD_REQUEST,message:error.message,success:false})

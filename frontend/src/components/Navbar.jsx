@@ -15,6 +15,7 @@ const Navbar = () => {
   const [openCart, setOpenCart] = useState(false);
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
+  const role = JSON.parse(localStorage.getItem('role'))
   
   const { numberOfItems } = useSelector((state) => state.cart);
   const {user,error} = useSelector((state) => state.users);
@@ -48,7 +49,6 @@ const Navbar = () => {
   const handleLogout = () => {
     const logout = async () => {
       const result = await dispatch(logoutUser());
-      console.log(result);
 
       if (result.payload?.success) {
         localStorage.setItem("Bearer", "");
@@ -87,10 +87,10 @@ const Navbar = () => {
             component={<ProfilePage close={handleClose} />}
           />
 
-          <Button onClick={() => handleClickOpenCart(true)}>
+          {role=='customer' && <Button onClick={() => handleClickOpenCart(true)}>
             <ShoppingCartIcon color="green" />
             <sup className="text-success">{numberOfItems}</sup>
-          </Button>
+          </Button>}
           {/* cart dialogbox */}
           <DialogBox
             open={openCart}

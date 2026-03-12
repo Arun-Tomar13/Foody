@@ -20,6 +20,8 @@ const createOrderItemsTable = require("./models/orderItems.model.js");
 const createAddressTable = require("./models/address.model.js");
 const {fileCleanup} = require("./utils/fileCleanup.js");
 const transactionTable = require("./models/transaction.model.js");
+const moduleTable = require("./models/module.model.js");
+const actionTable = require("./models/action.model.js");
 app.use(cors({
   origin:'*',
   withCredentials:true
@@ -57,6 +59,8 @@ app.listen(port, () => {
   createOrderItemsTable()
   createAddressTable()
   transactionTable()
+  moduleTable()
+  actionTable()
 
 });
  

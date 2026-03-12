@@ -1,7 +1,6 @@
 const tableConstant={
     user:'users',
     role:'roles',
-    Permission:'permissions',
     restaurant:"restaurants",
     menu:"menu",
     category:"category",
@@ -11,20 +10,11 @@ const tableConstant={
     orderItem:"order_items",
     address:"address",
     transaction:'transactions',
-    wallet:'user_wallet'
+    wallet:'user_wallet',
+    module:"modules",
+    permission:"permissions",
+    action:"actions",
 }
-
-// const responseMessage = {
-//     restaurantCreated : "restaurant created succesfully",
-//     restaurantUpdated : "restaurant info updated sucessfuly",
-//     errorInCreatingRestaurant : "error while creating restaurant",
-//     errorInCreatingMenu : "error while creating menu",
-//     errorInUpdatingRestaurant : "error while updating the restaurant info",
-//     hadRestaurant : "user already has a restaurant",
-//     removeRestaurant : "restaurant removed",
-//     hadNotRestaurant : "user does not have restaurant",
-//     succesInRestaurantInfo : "user does not have restaurant",
-// }
 
 const responseMessage = {
     restaurantCreated : "restaurant created succesfully",
@@ -58,11 +48,30 @@ const number_Regrex = new RegExp('[0-9]');
 const menuBulkCSVFormateHeader = ['price','category','name','description','available','type','restaurant']
 const categoryBulkCSVFormateHeader = ['name','description','restaurant']
 
-const role={
-    customer:'customer',
-    admin:'admin',
-    restaurant_owner:'restaurant owner',
-    delivery_partner:'delivery partner',
+const rolesConstant={
+    admin:1,
+    customer:2,
+    delivery_partner:3,
+    restaurant_owner:4,
+}
+const moduleConstant={
+    user:1,
+    restaurant:2,
+    category:3,
+    menu:4,
+    cart:5,
+    order:6,
+    charts:7,
+    transaction:8,
 }
 
-module.exports = {tableConstant,responseMessage,formatSqlTimestamp,number_Regrex,menuBulkCSVFormateHeader,categoryBulkCSVFormateHeader,role}
+const actionConstant={
+    create:1,
+    read:2,
+    update:3,
+    delete:4,
+    read_all:5,
+    admin_only:6,
+}
+
+module.exports = {tableConstant,responseMessage,formatSqlTimestamp,number_Regrex,menuBulkCSVFormateHeader,categoryBulkCSVFormateHeader,rolesConstant,moduleConstant,actionConstant}

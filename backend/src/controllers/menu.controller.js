@@ -135,7 +135,7 @@ const bulkUploadItemToMenu = async (req, res) => {
 
       if (count == 2) {
         for (let i in menuBulkCSVFormateHeader) {
-          if (!restaurant_id && i == 6) break;
+          if (restaurant_id && i == 6) break;
           if (
             menuBulkCSVFormateHeader[i] == undefined ||
             menuBulkCSVFormateHeader[i] != Object.keys(row)[i].trim()
@@ -252,7 +252,6 @@ const bulkUploadItemToMenu = async (req, res) => {
             name: inputData[i].category,
             restaurant_id: inputData[i].restaurant,
           });
-          console.log(categoryResult);
 
           if (categoryResult.length == 0)
             error += `category ${inputData[i].category} does not exists${restaurant_id ? "" : ` in ${restaurantName}`} at row ${count}, `;

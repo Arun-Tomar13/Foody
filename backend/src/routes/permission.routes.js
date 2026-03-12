@@ -1,5 +1,5 @@
 const express = require('express')
-const { addPermissions, removePermission, readPermission } = require('../controllers/admin.controller')
+const { addPermissions, removePermission, readPermission } = require('../controllers/permission.controller')
 
 const router = express.Router()
 

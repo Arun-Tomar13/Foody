@@ -1,6 +1,8 @@
+import { useSelector } from "react-redux";
 import { Link } from "react-router";
 
 const Sidebar = () => {
+  const role = useSelector((state)=>state?.users?.user?.role)
   return (
         <ul className="d-flex flex-column gap-3 list-group text-black">
             <li >
@@ -20,30 +22,30 @@ const Sidebar = () => {
                 Restaurant
               </Link>
             </li>
-            <li >
+            {role=='customer' && <li >
               <Link
                 className="property-none link-opacity-100 text-decoration-none text-white"
                 to="/orders"
               >
                 orders
               </Link>
-            </li>
-            <li >
+            </li>}
+           {role=='customer' && <li >
               <Link
                 className="property-none link-opacity-100 text-decoration-none text-white"
                 to="/transactions"
               >
                 transactions
               </Link>
-            </li>
-            <li >
+            </li> }
+            {role=='admin' && <li >
               <Link
                 className="property-none link-opacity-100 text-decoration-none text-white"
                 to="/charts"
               >
                 charts
               </Link>
-            </li>
+            </li> }
           </ul>
   )
 }

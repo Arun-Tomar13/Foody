@@ -70,18 +70,16 @@ const ProfilePage = ({ close }) => {
   }, [user]);
 
   const onSubmit = async (data) => {
-    console.log(data);
-
+    
     const formData = new FormData();
     if (file) formData.append("user_image", file);
-    console.log(file);
 
     for (let key in data) {
+      if(key=='role') continue
       formData.append(`${key}`, data[key]);
     }
 
     const result = await dispatch(updateProfile(formData));
-    console.log(result);
     if (result) setReadOnly((pre) => !pre);
 
     if (result.payload?.success) close();

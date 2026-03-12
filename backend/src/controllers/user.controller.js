@@ -1,5 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
 const userService = require("../services/user.service");
+const roleService = require("../services/role.services");
 const sendResponse = require("../utils/response");
 
 // Get profile
@@ -15,7 +16,7 @@ const getProfile = async (req, res) => {
         success: false,
       });
 
-    const user = await userService.getUserById(res,userId);
+    const user = await userService.getUserById(res, userId);
 
     if (user.length == 0)
       sendResponse({
@@ -23,11 +24,24 @@ const getProfile = async (req, res) => {
         statusCode: StatusCodes.BAD_REQUEST,
         message: "user does not exists",
       });
+
+    const role = await roleService.getRolesById(res, user[0].role);
+
+    if (role.length == 0)
+      sendResponse({
+        res,
+        statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+        message: "internal server error",
+        success: false,
+      });
+
+    user[0].role = role[0].name;
+    
     return sendResponse({
       res,
       statusCode: StatusCodes.OK,
       message: "successfully get the user profile",
-      data:user
+      data: user,
     });
   } catch (error) {
     return sendResponse({
@@ -42,22 +56,19 @@ const getProfile = async (req, res) => {
 // Update
 const updateProfile = async (req, res) => {
   try {
-    
-    const userId = req.user; 
+    const userId = req.user;
     const data = req.body;
-    
-    if(req.file) data.user_image = req.file.path
-    
+
+    if (req.file) data.user_image = req.file.path;
+
     if (!userId)
       sendResponse({
-    res,
-    statusCode: StatusCodes.BAD_REQUEST,
-    message: "user id is not present",
-    success: false,
-  });
-  
-  console.log(data);
-    const user = await userService.updateUserById(res,userId, data);
+        res,
+        statusCode: StatusCodes.BAD_REQUEST,
+        message: "user id is not present",
+        success: false,
+      });
+    const user = await userService.updateUserById(res, userId, data);
 
     if (!user)
       sendResponse({
@@ -67,7 +78,7 @@ const updateProfile = async (req, res) => {
         success: false,
       });
 
-      const updatedUser = await userService.getUserById(res,userId)
+    const updatedUser = await userService.getUserById(res, userId);
 
     return sendResponse({
       res,
@@ -98,7 +109,7 @@ const deleteProfile = async (req, res) => {
         success: false,
       });
 
-    const user = await userService.removeUserById(res,userId);
+    const user = await userService.removeUserById(res, userId);
 
     return sendResponse({
       res,
@@ -115,9 +126,5 @@ const deleteProfile = async (req, res) => {
     });
   }
 };
-
-
-
-
 
 module.exports = { getProfile, updateProfile, deleteProfile };

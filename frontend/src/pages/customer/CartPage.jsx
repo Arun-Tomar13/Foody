@@ -24,6 +24,7 @@ import { useState } from "react";
 import TextInput from "../../components/InputFields/TextInput";
 import CustomButton from "../../components/InputFields/CustomButton";
 import { getAllTransactions } from "../../store/slices/transactionSlice";
+import CustomSnackbar from "../../components/CustomSnackbar";
 
 const CartPage = ({ close }) => {
   const dispatch = useDispatch();
@@ -303,6 +304,14 @@ const CartPage = ({ close }) => {
           </p>
         </div>
       )}
+       {error && (
+          <CustomSnackbar
+            type="error"
+            variant="filled"
+            open={open}
+            message={error.message}
+          />
+        )}
     </div>
   );
 };

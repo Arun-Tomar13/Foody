@@ -132,7 +132,7 @@ const addCategoryInBulk = async (req, res) => {
       if (count == 2) {
         for (let i in categoryBulkCSVFormateHeader) {
           
-          if (!restaurant_id && i == 1) break;
+          if (restaurant_id && i == 1) break;
           if (
             categoryBulkCSVFormateHeader[i] == undefined ||
             categoryBulkCSVFormateHeader[i] != Object.keys(row)[i].trim()
