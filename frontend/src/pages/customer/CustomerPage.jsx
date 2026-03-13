@@ -56,6 +56,7 @@ const CustomerPage = () => {
         <TextField
           className="px-5"
           placeholder="search by name"
+          value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </Grid>

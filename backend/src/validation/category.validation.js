@@ -2,8 +2,7 @@ const Joi = require("joi");
 
 const createCategorySchema = Joi.object({
   name: Joi.string().required(),
-  description: Joi.string().required(),
-  restaurant_id: Joi.number().positive().required(),
+  description: Joi.string().required()
 });
 const updateCategorySchema = Joi.object({
   name: Joi.string().required(),

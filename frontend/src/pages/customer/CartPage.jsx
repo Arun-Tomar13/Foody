@@ -202,7 +202,7 @@ const CartPage = ({ close }) => {
                 <Switch
                   checked={isAdd}
                   onChange={(e) => setIsAdd(e.target.checked)}
-                />{" "}
+                />
                 Add address
               </Grid>
             </Grid>

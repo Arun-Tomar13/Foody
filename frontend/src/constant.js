@@ -269,10 +269,10 @@ export const name_regrex = /^[a-zA-Z ]+$/;
 export const phone_regrex = /[0-9]$/
 
 export const USER_ROLES = {
-  customer: "customer",
-  admin:'admin',
-  restaurent_owner:'restaurant_Owner',
-  delivery_partner:'delivery_Partner'
+  admin:1,
+  customer:2,
+  delivery_partner:3,
+  restaurent_owner:4,
 };
 
 

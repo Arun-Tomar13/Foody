@@ -37,7 +37,6 @@ const CutsomCharts = ({
       <XAxis categories={xData}>{xName}</XAxis>
       <YAxis categories={yData}>{yName}</YAxis>
       {data.map((item, index) => {
-        
         return (
           <Series type={type} data={item.data} name={item.name} key={index} />
         );

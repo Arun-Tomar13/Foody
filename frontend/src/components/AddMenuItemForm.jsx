@@ -29,7 +29,7 @@ const AddMenuItemForm = ({forAdd, data, fn, close }) => {
         .required("description a country"),
     })
     .required();
-  const {id} = useParams()
+  const param = useParams()
   
   const dispatch = useDispatch();
   const [file, setFile] = useState(null);
@@ -57,8 +57,9 @@ console.log(errors);
     for(let key in data){
       formData.append(`${key}`,data[key])
     }
-
-    const result = await dispatch(fn({formData,id}));
+    let result;
+    if(param.id) result = await dispatch(fn({formData,id:param.id}));
+    else result = await dispatch(fn({formData}))
     console.log("menu add/update result", result);
 
     if (result.payload.success) {

@@ -64,7 +64,9 @@ const GetAllMenu = () => {
 
   useEffect(() => {
     const getCategories = async () => {
-      const result = await dispatch(getAllCategories(id));
+      let result;
+      if (id) result = await dispatch(getAllCategories({ id }));
+      else result = await dispatch(getAllCategories({}));
       console.log(result);
     };
     getCategories();
@@ -268,19 +270,21 @@ const GetAllMenu = () => {
 
       <Grid>
         {/* update dialogbox */}
-       { menuItem && <DialogBox
-          open={openForUpdate}
-          onClose={handleClose}
-          title="update item"
-          component={
-            <AddMenuItemForm
-              forAdd={false}
-              fn={updateMenu}
-              data={menuItem}
-              close={handleClose}
-            />
-          }
-        />}
+        {menuItem && (
+          <DialogBox
+            open={openForUpdate}
+            onClose={handleClose}
+            title="update item"
+            component={
+              <AddMenuItemForm
+                forAdd={false}
+                fn={updateMenu}
+                data={menuItem}
+                close={handleClose}
+              />
+            }
+          />
+        )}
 
         {/* MenuList */}
         <DataGrid

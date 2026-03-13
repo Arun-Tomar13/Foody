@@ -129,7 +129,7 @@ const Dashboard = () => {
           xData={dates}
           yName="Revenue"
           yData={totalRestaurants}
-          xName="restaurant"
+          xName="Dates"
           data={revenuePerday}
         />
       </Grid>}

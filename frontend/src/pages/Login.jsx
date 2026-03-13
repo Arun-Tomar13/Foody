@@ -91,15 +91,20 @@ const Login = () => {
               {!loading ? (
                 <CustomButton name="Login" variant="contained"></CustomButton>
               ) : (
-                <Button size="small" color="primary" variant="contained" >
+                <Button size="small" color="primary" variant="contained">
                   <CircularProgress color="white" size="25px" />
-                  <div className="px-2 py-1" >Logging in</div>
+                  <div className="px-2 py-1">Logging in</div>
                 </Button>
               )}
             </Grid>
             {/* Error Text */}
             {error && (
-              <CustomSnackbar type='error' variant="outlined" open={open} message={error.message} />
+              <CustomSnackbar
+                type="error"
+                variant="outlined"
+                open={open}
+                message={error.message}
+              />
             )}
           </Grid>
         </AFormProvider>
@@ -107,10 +112,7 @@ const Login = () => {
 
       {/* Right Side  */}
       <Grid size={{ md: 8, sm: 12 }}>
-        <img
-          src="https://media.istockphoto.com/id/1397744355/vector/signing-up-for-a-course-isolated-cartoon-vector-illustrations.jpg?s=612x612&w=0&k=20&c=6eATmEGQYn5E0cKXemGPfZXLuo8_cN8Mkm1Ov2cdNio="
-          alt="registering image"
-        />
+        <video width='65%' src="/home.mp4" autoPlay loop />
       </Grid>
     </Grid>
   );

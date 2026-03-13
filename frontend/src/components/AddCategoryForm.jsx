@@ -8,7 +8,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import CustomButton from "./InputFields/CustomButton";
 import { useDispatch } from "react-redux";
 
-const AddCategoryForm = ({data,fn,close}) => {
+const AddCategoryForm = ({data,fn,close,restaurant_id=null}) => {
   
 
   const schema = yup
@@ -33,8 +33,9 @@ const AddCategoryForm = ({data,fn,close}) => {
 
   const onSubmit = async (data) => {
     console.log('data',data);
-
-    const result=await dispatch(fn(data));
+    let result;
+    if(restaurant_id)  result=await dispatch(fn({inputData:data,id:restaurant_id}));
+    else result=await dispatch(fn({inputData:data}));
     console.log(result);
     
 

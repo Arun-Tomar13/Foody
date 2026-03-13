@@ -7,8 +7,8 @@ const upload = require('../middlewares/multer.middleware');
 const checkPermission = require('../middlewares/role.middleware');
 const { moduleConstant, actionConstant } = require('../utils/constant');
 
-router.post('/restaurant/:restaurant_id',checkPermission(moduleConstant.menu,actionConstant.create),validate(createMenuSchema),upload('menu').single('image'),addItemToMenu)
 router.post('/bulk',checkPermission(moduleConstant.menu,actionConstant.create),upload('category').single('menu'),bulkUploadItemToMenu)
+router.post('/',checkPermission(moduleConstant.menu,actionConstant.create),validate(createMenuSchema),upload('menu').single('image'),addItemToMenu)
 router.get('/:id',checkPermission(moduleConstant.menu,actionConstant.read),getMenuItemById)
 router.get('/',checkPermission(moduleConstant.menu,actionConstant.read_all),getMenuItem)
 router.delete('/:id',checkPermission(moduleConstant.menu,actionConstant.delete),removeMenuItem)

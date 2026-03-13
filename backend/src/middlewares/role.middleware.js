@@ -22,9 +22,6 @@ const checkPermission = (module_id, action_id) => {
 
       if (role_id == rolesConstant.admin) {next(); return };
 
-      console.log(role_id,module_id,action_id);
-      
-
       const isHasPermission = await db(tableConstant.permission).where({
         role_id,
         module_id,

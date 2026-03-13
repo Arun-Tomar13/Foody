@@ -12,8 +12,8 @@ router.post('/',checkPermission(moduleConstant.category,actionConstant.create),v
 router.post('/bulk-upload',checkPermission(moduleConstant.category,actionConstant.create),upload('category').single('categories'),addCategoryInBulk)
 router.patch('/',checkPermission(moduleConstant.category,actionConstant.update),validate(updateCategorySchema),updateCategory)
 // router.post('/id',validate(categoryIdSchema),getAllCategory)
+router.get('/restaurant',checkPermission(moduleConstant.category,actionConstant.read_all),getAllCategorybyRestaurantId)
 router.get('/:id',checkPermission(moduleConstant.category,actionConstant.read),getCategoryById)
 router.delete('/:id',checkPermission(moduleConstant.category,actionConstant.delete),deleteCategory)
-router.get('/restaurant/:id',checkPermission(moduleConstant.category,actionConstant.read_all),getAllCategorybyRestaurantId)
 
 module.exports = router

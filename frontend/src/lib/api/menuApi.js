@@ -1,7 +1,7 @@
 import { axiosInstance } from "../axios"
 
 const addMenuItemApi = async (data)=>{
-    const result = await axiosInstance.post(`/menu/restaurant/${data.id}`,data.formData,{headers: { "Content-Type": "multipart/form-data"}});
+    const result = await axiosInstance.post(`/menu${data.id ? `?restaurant_id=${data.id}` : '' }`,data.formData,{headers: { "Content-Type": "multipart/form-data"}});
     return result
 }
 
@@ -16,7 +16,7 @@ const deleteMenuItemApi = async (itemid)=>{
     return result
 }
 
-const updateMenuApi = async ({formData,id})=>{
+const updateMenuApi = async ({formData})=>{
     const result = await axiosInstance.patch(`/menu`,formData,{headers: { "Content-Type": "multipart/form-data"}});
     return result
 }

@@ -7,6 +7,7 @@ const {
   menuBulkCSVFormName,
   menuBulkCSVFormateHeader,
   number_Regrex,
+  rolesConstant,
 } = require("../utils/constant");
 const sendResponse = require("../utils/response");
 const db = require("../config/db.config");
@@ -19,12 +20,13 @@ const { type } = require("os");
 const addItemToMenu = async (req, res) => {
   try {
     const { name, description, type, price, category_id } = req.body;
-    const { restaurant_id } = req.params;
-
-    const hasRestraurant = await restaurantService.getRestaurantId(
-      res,
-      restaurant_id,
-    );
+    const { restaurant_id } = req.query;
+    let hasRestraurant;
+    if (restaurant_id) hasRestraurant = await restaurantService.getRestaurantId(res,restaurant_id);
+    else{
+      const userid = req.user;
+      hasRestraurant = await restaurantService.getRestaurantbyOwnerId(res,userid)
+    }
 
     if (hasRestraurant.length == 0)
       return sendResponse({
@@ -39,7 +41,7 @@ const addItemToMenu = async (req, res) => {
       description,
       type,
       price,
-      restaurant_id,
+      restaurant_id:hasRestraurant[0].id,
       category_id,
       image: req.file.path,
     });
@@ -82,12 +84,15 @@ const addItemToMenu = async (req, res) => {
 const bulkUploadItemToMenu = async (req, res) => {
   try {
     const file = req.file;
-    const restaurant_id = req.query?.restaurant_id || null;
+    const role = req.role;
+    let restaurant_id;
+    if (rolesConstant.restaurant_owner == role) {
+      const userid = req.user;
+      console.log("in owner");
 
-    if (restaurant_id) {
-      const hasRestraurant = await restaurantService.getRestaurantId(
+      const hasRestraurant = await restaurantService.getRestaurantbyOwnerId(
         res,
-        restaurant_id,
+        userid,
       );
 
       if (hasRestraurant.length == 0)
@@ -97,6 +102,26 @@ const bulkUploadItemToMenu = async (req, res) => {
           message: responseMessage.hadNotRestaurant,
           success: false,
         });
+
+      restaurant_id = hasRestraurant[0].id;
+    } else {
+      console.log("in admin");
+
+      restaurant_id = req.query?.restaurant_id || null;
+      if (restaurant_id) {
+        const hasRestraurant = await restaurantService.getRestaurantId(
+          res,
+          restaurant_id,
+        );
+
+        if (hasRestraurant.length == 0)
+          return sendResponse({
+            res,
+            statusCode: StatusCodes.BAD_REQUEST,
+            message: responseMessage.hadNotRestaurant,
+            success: false,
+          });
+      }
     }
 
     const parser = fs
@@ -128,17 +153,17 @@ const bulkUploadItemToMenu = async (req, res) => {
       let description = row[Object.keys(row)[3]]?.toLowerCase().trim();
       let available = row[Object.keys(row)[4]]?.toLowerCase().trim();
       let type = row[Object.keys(row)[5]]?.toLowerCase().trim();
-      
+
       let restaurant;
-      if (!restaurant_id)
+      if (rolesConstant.admin == role)
         restaurant = row[Object.keys(row)[6]]?.toLowerCase().trim();
 
       if (count == 2) {
         for (let i in menuBulkCSVFormateHeader) {
-          if (restaurant_id && i == 6) break;
+          if (rolesConstant.admin != role && i == 6) break;
           if (
             menuBulkCSVFormateHeader[i] == undefined ||
-            menuBulkCSVFormateHeader[i] != Object.keys(row)[i].trim()
+            menuBulkCSVFormateHeader[i] != Object.keys(row)[i]?.trim()
           ) {
             errors.push(
               `header ${Number(i) + 1} '${Object.keys(row)[i]}' cannot match format. it must be ${menuBulkCSVFormateHeader[i]}, `,
@@ -159,12 +184,14 @@ const bulkUploadItemToMenu = async (req, res) => {
         error += `empty fields in row ${count}, `;
         isError = true;
       }
-      if (Object.keys(row).length > (restaurant_id ? 6 : 7)) {
+      if (Object.keys(row).length > (rolesConstant.admin != role ? 6 : 7)) {
         error += `extra fields in row ${count}, `;
         isError = true;
       }
       if (
-        menuFromCSV.includes(name + category + restaurant_id ? "" : restaurant)
+        menuFromCSV.includes(
+          name + category + rolesConstant.admin != role ? "" : restaurant,
+        )
       ) {
         error += `duplicate entry in row ${count}, `;
         isError = true;
@@ -174,7 +201,7 @@ const bulkUploadItemToMenu = async (req, res) => {
         number_Regrex.test(description) ||
         number_Regrex.test(available) ||
         number_Regrex.test(category) ||
-        (restaurant_id && number_Regrex.test(restaurant))
+        (rolesConstant.admin == role && number_Regrex.test(restaurant))
       ) {
         error += `numerical value at row ${count}, `;
         isError = true;
@@ -188,7 +215,9 @@ const bulkUploadItemToMenu = async (req, res) => {
         isError = true;
       }
       if (error) errors.push(error);
-      menuFromCSV.push(name + category + (restaurant_id ? "" : restaurant));
+      menuFromCSV.push(
+        name + category + (rolesConstant.admin != role ? "" : restaurant),
+      );
       count++;
 
       if (!isError)
@@ -199,7 +228,7 @@ const bulkUploadItemToMenu = async (req, res) => {
           description,
           available,
           type,
-          restaurant: restaurant_id ? restaurant_id : restaurant,
+          restaurant: rolesConstant.admin != role ? restaurant_id : restaurant,
         });
     }
 
@@ -221,7 +250,7 @@ const bulkUploadItemToMenu = async (req, res) => {
         restaurantName = inputData[i].restaurant || null,
         categoryName = inputData[i].category || null;
 
-      if (!restaurant_id) {
+      if (rolesConstant.admin == role) {
         if (!restaurantCache[inputData[i].restaurant]) {
           const restaurantResult = await restaurantService.getRestaurantByName(
             res,
@@ -254,7 +283,7 @@ const bulkUploadItemToMenu = async (req, res) => {
           });
 
           if (categoryResult.length == 0)
-            error += `category ${inputData[i].category} does not exists${restaurant_id ? "" : ` in ${restaurantName}`} at row ${count}, `;
+            error += `category ${inputData[i].category} does not exists${rolesConstant.admin != role ? "" : ` in ${restaurantName}`} at row ${count}, `;
           else {
             categoryCache[inputData[i].category + inputData[i].restaurant] =
               categoryResult[0].id;
@@ -297,7 +326,8 @@ const bulkUploadItemToMenu = async (req, res) => {
       });
     }
 
-    let ids=[],results=[];
+    let ids = [],
+      results = [];
 
     for (let data of inputData) {
       try {
@@ -318,9 +348,9 @@ const bulkUploadItemToMenu = async (req, res) => {
             message: responseMessage.errorInCreatingMenu,
             success: false,
           });
-          else{
-            ids.push(result[0])
-          }
+        else {
+          ids.push(result[0]);
+        }
       } catch (error) {
         return sendResponse({
           res,
@@ -331,18 +361,18 @@ const bulkUploadItemToMenu = async (req, res) => {
       }
     }
 
-    if(restaurant_id) {
-      for(let id of ids){
-      let data = await menuService.getMenuItemById(res,id)
-      results.push(data[0])
-    }
+    if (restaurant_id) {
+      for (let id of ids) {
+        let data = await menuService.getMenuItemById(res, id);
+        results.push(data[0]);
+      }
     }
 
     return sendResponse({
       res,
       statusCode: StatusCodes.CREATED,
       message: "menu added successfully",
-      data: restaurant_id ? results : []
+      data: rolesConstant.admin != role ? results : [],
     });
   } catch (error) {
     return sendResponse({
@@ -354,14 +384,12 @@ const bulkUploadItemToMenu = async (req, res) => {
   }
 };
 
-
 // Update Menu
 const updateMenuItem = async (req, res) => {
   try {
     // const userid = req.user;
     let { id, name, description, type, price, image } = req.body;
     console.log(req.body);
-    
 
     // const hasRestraurant =
     //   await restaurantService.getRestaurantbyOwnerId(userid);
@@ -508,7 +536,9 @@ const getMenuItemById = async (req, res) => {
 // get All menu for restaurant
 const getMenuItem = async (req, res) => {
   try {
-    const data = req.query;
+    let data = req.query;
+    const role = req.role;
+    const userid = req.user;
 
     if (data.category_id) {
       const hasCategory = await db(tableConstant.category).where({
@@ -524,10 +554,14 @@ const getMenuItem = async (req, res) => {
         });
     }
 
-    if (data.restaurant_id) {
+    if (data.restaurant_id || rolesConstant.restaurant_owner == role ) {
+      if( rolesConstant.restaurant_owner == role) {
+        const restaurant = await restaurantService.getRestaurantbyOwnerId(res,userid);
+        data.restaurant_id=restaurant[0].id
+      }
       const hasRestraurant = await restaurantService.getRestaurantId(
         res,
-        data.restaurant_id,
+        data.restaurant_id ,
       );
       // console.log("has restro", hasRestraurant);
 

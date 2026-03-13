@@ -7,6 +7,7 @@ const {
   string_Regrex,
   number_Regrex,
   categoryBulkCSVFormateHeader,
+  rolesConstant,
 } = require("../utils/constant");
 const sendResponse = require("../utils/response");
 const db = require("../config/db.config");
@@ -16,32 +17,48 @@ const csv = require("csv-parser");
 // Add Category
 const addCategory = async (req, res) => {
   try {
-    const { name, description, restaurant_id } = req.body;
+    const { name, description } = req.body;
+    const { restaurant_id } = req.query;
+    let hasRestraurant;
+    if (restaurant_id)
+      hasRestraurant = await restaurantService.getRestaurantId(
+        res,
+        restaurant_id,
+      );
+    else {
+      const userid = req.user;
+      hasRestraurant = await restaurantService.getRestaurantbyOwnerId(
+        res,
+        userid,
+      );
+    }
 
-    const isRestaurant = await restaurantService.getRestaurantId(
-      res,
-      restaurant_id,
-    );
-
-    if (isRestaurant.length == 0)
+    if (hasRestraurant.length == 0)
       return sendResponse({
         res,
         statusCode: StatusCodes.BAD_REQUEST,
-        message: "restaurant does not exists",
+        message: responseMessage.hadNotRestaurant,
         success: false,
       });
-      
-      const hasCategoryategory = await categoryService.getCategory(res,{name,restaurant_id})
 
-      if (hasCategoryategory.length > 0)
-        return sendResponse({
-          res,
-          statusCode: StatusCodes.BAD_REQUEST,
-          message: "category already exists",
-          success: false,
-        });
+    const hasCategoryategory = await categoryService.getCategory(res, {
+      name,
+      restaurant_id: hasRestraurant[0].id,
+    });
 
-    const add = await categoryService.createCategory(res,{name,description,restaurant_id})
+    if (hasCategoryategory.length > 0)
+      return sendResponse({
+        res,
+        statusCode: StatusCodes.BAD_REQUEST,
+        message: "category already exists",
+        success: false,
+      });
+
+    const add = await categoryService.createCategory(res, {
+      name,
+      description,
+      restaurant_id: hasRestraurant[0].id,
+    });
 
     if (add.length == 0)
       return sendResponse({
@@ -51,7 +68,7 @@ const addCategory = async (req, res) => {
         success: false,
       });
 
-    const category = await categoryService.getCategory(res,{id:add[0]})
+    const category = await categoryService.getCategory(res, { id: add[0] });
 
     return sendResponse({
       res,
@@ -73,29 +90,44 @@ const addCategory = async (req, res) => {
 const addCategoryInBulk = async (req, res) => {
   try {
     const file = req.file;
-    const restaurant_id = req.query?.restaurant_id || null;
+    const role = req.role;
+    let restaurant_id;
+    if (rolesConstant.restaurant_owner == role) {
+      const userid = req.user;
+      console.log("in owner");
 
-    if (!file)
-      return sendResponse({
+      const hasRestraurant = await restaurantService.getRestaurantbyOwnerId(
         res,
-        statusCode: StatusCodes.BAD_REQUEST,
-        message: "file does not exists",
-        success: false,
-      });
-
-    if (restaurant_id) {
-      const isRestaurant = await restaurantService.getRestaurantId(
-        res,
-        restaurant_id,
+        userid,
       );
 
-      if (isRestaurant.length == 0)
+      if (hasRestraurant.length == 0)
         return sendResponse({
           res,
           statusCode: StatusCodes.BAD_REQUEST,
-          message: "restaurant does not exists",
+          message: responseMessage.hadNotRestaurant,
           success: false,
         });
+
+      restaurant_id = hasRestraurant[0].id;
+    } else {
+      console.log("in admin");
+
+      restaurant_id = req.query?.restaurant_id || null;
+      if (restaurant_id) {
+        const hasRestraurant = await restaurantService.getRestaurantId(
+          res,
+          restaurant_id,
+        );
+
+        if (hasRestraurant.length == 0)
+          return sendResponse({
+            res,
+            statusCode: StatusCodes.BAD_REQUEST,
+            message: responseMessage.hadNotRestaurant,
+            success: false,
+          });
+      }
     }
 
     const parser = fs
@@ -126,16 +158,16 @@ const addCategoryInBulk = async (req, res) => {
       let name = row[Object.keys(row)[0]]?.toLowerCase().trim();
       let description = row[Object.keys(row)[1]].toLowerCase().trim();
       let restaurant;
-      if (!restaurant_id)
+      if (!rolesConstant.admin == role)
         restaurant = row[Object.keys(row)[2]]?.toLowerCase().trim();
 
       if (count == 2) {
         for (let i in categoryBulkCSVFormateHeader) {
-          
-          if (restaurant_id && i == 1) break;
+          if (rolesConstant.admin != role && i == 2) break;
+
           if (
             categoryBulkCSVFormateHeader[i] == undefined ||
-            categoryBulkCSVFormateHeader[i] != Object.keys(row)[i].trim()
+            categoryBulkCSVFormateHeader[i] != Object.keys(row)[i]?.trim()
           ) {
             errors.push(
               `header ${Number(i) + 1} '${Object.keys(row)[i]}' cannot match format. it must be ${categoryBulkCSVFormateHeader[i]}, `,
@@ -144,35 +176,45 @@ const addCategoryInBulk = async (req, res) => {
           }
         }
       }
-      if (!name || !description || (!restaurant_id && !restaurant)) {
+      if (
+        !name ||
+        !description ||
+        (rolesConstant.admin == role && !restaurant)
+      ) {
         error += `empty fields in row ${count}, `;
         isError = true;
       }
-      if (Object.keys(row).length > (restaurant_id ? 2 : 3)) {
+      if (Object.keys(row).length > (rolesConstant.admin != role ? 2 : 3)) {
         error += `extra fields in row ${count}, `;
         isError = true;
       }
-      if (categoriesFromCSV.includes(name + restaurant_id ? "" : restaurant)) {
+      if (
+        categoriesFromCSV.includes(
+          name + rolesConstant.admin != role ? "" : restaurant,
+        )
+      ) {
         error += `duplicate entry in row ${count}, `;
         isError = true;
       }
       if (
         number_Regrex.test(name) ||
         number_Regrex.test(description) ||
-        (restaurant_id && number_Regrex.test(restaurant))
+        (rolesConstant.admin == role && number_Regrex.test(restaurant))
       ) {
         error += `data cannot be number,in row ${count}, `;
         isError = true;
       }
       if (error) errors.push(error);
-      categoriesFromCSV.push(name + (restaurant_id ? "" : restaurant));
+      categoriesFromCSV.push(
+        name + (rolesConstant.admin != role ? "" : restaurant),
+      );
       count++;
 
       if (!isError)
         inputData.push({
           name,
           description,
-          restaurant: restaurant_id ? restaurant_id : restaurant,
+          restaurant: rolesConstant.admin != role ? restaurant_id : restaurant,
         });
     }
 
@@ -190,7 +232,7 @@ const addCategoryInBulk = async (req, res) => {
       let error = "",
         restaurantName = inputData[i].restaurant || null;
 
-      if (!restaurant_id) {
+      if (rolesConstant.admin == role) {
         if (!restaurantCache[inputData[i].restaurant]) {
           const restaurantResult = await restaurantService.getRestaurantByName(
             res,
@@ -226,7 +268,7 @@ const addCategoryInBulk = async (req, res) => {
           }
 
           if (categoriesFromDB.includes(inputData[i].name)) {
-            error += `category ${inputData[i].name} already exists${restaurant_id ? "" : ` in ${restaurantName}`} at row ${count}, `;
+            error += `category ${inputData[i].name} already exists${rolesConstant.admin != role ? "" : ` in ${restaurantName}`} at row ${count}, `;
           }
           categoryCache[inputData[i].restaurant] = categoriesFromDB;
           categoriesFromDB = [];
@@ -235,7 +277,7 @@ const addCategoryInBulk = async (req, res) => {
         if (
           categoryCache[inputData[i].restaurant].includes(inputData[i].name)
         ) {
-          error += `category ${inputData[i].name} already exists${restaurant_id ? "" : ` in ${restaurantName}`} at row ${count}, `;
+          error += `category ${inputData[i].name} already exists${rolesConstant.admin != role ? "" : ` in ${restaurantName}`} at row ${count}, `;
         }
       }
 
@@ -258,7 +300,7 @@ const addCategoryInBulk = async (req, res) => {
 
     for (let row of inputData) {
       try {
-        const id = await categoryService.createCategory(res,{
+        const id = await categoryService.createCategory(res, {
           name: row.name,
           description: row.description,
           restaurant_id: row.restaurant,
@@ -280,7 +322,7 @@ const addCategoryInBulk = async (req, res) => {
 
     if (restaurant_id) {
       for (let id of ids) {
-        const data = await categoryService.getCategory(res,{id})
+        const data = await categoryService.getCategory(res, { id });
         results.push(data[0]);
       }
     }
@@ -289,7 +331,7 @@ const addCategoryInBulk = async (req, res) => {
       res,
       statusCode: StatusCodes.CREATED,
       message: "categories added successfully",
-      data: restaurant_id ? "results" : [],
+      data: rolesConstant.admin != role ? results : [],
     });
   } catch (error) {
     return sendResponse({
@@ -306,7 +348,7 @@ const updateCategory = async (req, res) => {
   try {
     const { id, name, description, isAvailable } = req.body;
 
-    const isRestaurant = await categoryService.getCategory(res,{ id });
+    const isRestaurant = await categoryService.getCategory(res, { id });
 
     if (isRestaurant.length == 0)
       return sendResponse({
@@ -316,7 +358,12 @@ const updateCategory = async (req, res) => {
         success: false,
       });
 
-    const add = await categoryService.updateCategory(res,{id,name,description,isAvailable})
+    const add = await categoryService.updateCategory(res, {
+      id,
+      name,
+      description,
+      isAvailable,
+    });
     if (add.length == 0)
       return sendResponse({
         res,
@@ -325,7 +372,7 @@ const updateCategory = async (req, res) => {
         success: false,
       });
 
-    const category = await categoryService.getCategory(res,{id})
+    const category = await categoryService.getCategory(res, { id });
 
     return sendResponse({
       res,
@@ -348,7 +395,7 @@ const deleteCategory = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const isCategory = await categoryService.getCategory(res,{id});
+    const isCategory = await categoryService.getCategory(res, { id });
 
     if (isCategory.length == 0)
       return sendResponse({
@@ -358,7 +405,7 @@ const deleteCategory = async (req, res) => {
         success: false,
       });
 
-    const add = await categoryService.removeCategoryById(res,{id})
+    const add = await categoryService.removeCategoryById(res, { id });
 
     if (!add)
       return sendResponse({
@@ -389,7 +436,7 @@ const getCategoryById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const category = await categoryService.getCategory(res,{id})
+    const category = await categoryService.getCategory(res, { id });
 
     if (category.length == 0)
       return sendResponse({
@@ -417,19 +464,25 @@ const getCategoryById = async (req, res) => {
 
 const getAllCategorybyRestaurantId = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.query;
+    const userid = req.user;
 
-    const isRestaurant = await restaurantService.getRestaurantId(res, id);
+    let isRestaurant;
+    
+    if (id) isRestaurant = await restaurantService.getRestaurantId(res, id)
+    else isRestaurant = await restaurantService.getRestaurantbyOwnerId(res,userid)
 
-    if (isRestaurant.length == 0)
+    if (isRestaurant.length==0)
       return sendResponse({
         res,
         statusCode: StatusCodes.BAD_REQUEST,
-        message: "category does not exists",
+        message: "restaurant does not exists",
         success: false,
       });
 
-    const category = await categoryService.getCategory(res,{restaurant_id: id });
+    const category = await categoryService.getCategory(res, {
+      restaurant_id: isRestaurant[0].id,
+    });
 
     return sendResponse({
       res,

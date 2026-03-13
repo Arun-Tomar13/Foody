@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link, Navigate, useNavigate } from "react-router";
 import { Avatar, Button, Grid } from "@mui/material";
 import { LogOut, ShoppingCartIcon } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,13 +9,14 @@ import CartPage from "../pages/customer/CartPage";
 import { getAllCart } from "../store/slices/cartSlice";
 import { getProfile, logoutUser } from "../store/slices/userSlice";
 import CustomSnackbar from "./CustomSnackbar";
+import { USER_ROLES } from "../constant";
 
 const Navbar = () => {
   const [openProfile, setOpenProfile] = useState(false);
   const [openCart, setOpenCart] = useState(false);
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
-  const role = JSON.parse(localStorage.getItem('role'))
+  const navigate = useNavigate();
   
   const { numberOfItems } = useSelector((state) => state.cart);
   const {user,error} = useSelector((state) => state.users);
@@ -52,6 +53,7 @@ const Navbar = () => {
 
       if (result.payload?.success) {
         localStorage.setItem("Bearer", "");
+        navigate('/login')
       }
     };
     logout();
@@ -87,7 +89,7 @@ const Navbar = () => {
             component={<ProfilePage close={handleClose} />}
           />
 
-          {role=='customer' && <Button onClick={() => handleClickOpenCart(true)}>
+          {user?.role==USER_ROLES.customer && <Button onClick={() => handleClickOpenCart(true)}>
             <ShoppingCartIcon color="green" />
             <sup className="text-success">{numberOfItems}</sup>
           </Button>}

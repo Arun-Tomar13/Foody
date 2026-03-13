@@ -12,6 +12,10 @@ const updateRestaurantApi = async ({id,name, address, type, openingTime, closing
     const result = await axiosInstance.patch(`/restaurant/${id}`,{name, address, type, openingTime, closingTime})
     return result
 }
+const toggleAvailabilty = async (id)=>{
+    const result = await axiosInstance.patch(`/restaurant/${id}/toggle-availability`)
+    return result
+}
 const removeRestaurantApi = async (data)=>{
     // const result = await axiosInstance.get('/restaurant/delete',data)
     // return result
@@ -33,18 +37,15 @@ const removeRestaurantByIdApi = async (data)=>{
     const result = await axiosInstance.delete(`/restaurant/${data}`)
     return result
 }
-const getRestauarntInfoApi = async ()=>{
-    // const result = await axiosInstance.get('/restaurant/get-info')
-    // return result
-}
 const getRestauarntInfoByIdApi = async (data)=>{
+    console.log(data);
     
-    const result = await axiosInstance.get(`/restaurant/${data}`)
+    const result = await axiosInstance.get(`/restaurant${data.id ? `?id=${data.id}` : ''}`)
     return result
 }
 const getAllRestauarntsApi = async ()=>{
-    const result = await axiosInstance.get('/restaurant')
+    const result = await axiosInstance.get('/restaurant/all')
     return result
 }
 
-export {createRestaurantApi,updateRestaurantApi,MenuPerRestaurantApi,createRestaurantByAnyoneApi,removeRestaurantApi,getRestauarntInfoByIdApi,getRestauarntInfoApi,getAllRestauarntsApi,removeRestaurantByIdApi,orderAndRevenuePerRestaurantApi,revenuePerRestaurantApi}
+export {createRestaurantApi,updateRestaurantApi,MenuPerRestaurantApi,createRestaurantByAnyoneApi,removeRestaurantApi,getRestauarntInfoByIdApi,getAllRestauarntsApi,removeRestaurantByIdApi,orderAndRevenuePerRestaurantApi,revenuePerRestaurantApi,toggleAvailabilty}

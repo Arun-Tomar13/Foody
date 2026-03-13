@@ -1,7 +1,7 @@
 import { axiosInstance } from "../axios"
 
 const addCategoryApi = async (data)=>{
-    const result = await axiosInstance.post('/category',data);
+    const result = await axiosInstance.post(`/category${data.id ? `?restaurant_id=${data.id}` : ''}`,data.inputData);
     return result
 }
 const bulkUploadApi = async (data)=>{
@@ -22,12 +22,14 @@ const getCategoriesApi = async (restaurantId)=>{
 }
 
 const updateCategoryApi = async (data)=>{
-    const result = await axiosInstance.patch('/category',data);
+    const result = await axiosInstance.patch('/category',data.inputData);
     return result
 }
 
-const getAllCategoriesByRestroIdApi = async (id)=>{
-    const result = await axiosInstance.get(`/category/restaurant/${id}`)
+const getAllCategoriesByRestroIdApi = async (data)=>{
+    console.log("dd",data);
+    
+    const result = await axiosInstance.get(`/category/restaurant${data.id ? `?id=${data.id}` : ''}`)
     return result
 }
 

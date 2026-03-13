@@ -28,8 +28,9 @@ const getRestaurantbyOwnerId = async (res, userid) => {
         "openingTime",
         "closingTime",
         "rating",
+        "isOpen"
       );
-
+      
     return result;
   } catch (error) {
     return sendResponse({
@@ -54,7 +55,24 @@ const getRestaurantId = async (res, id) => {
         "openingTime",
         "closingTime",
         "rating",
+        "isOpen"
       );
+    return result;
+  } catch (error) {
+    return sendResponse({
+      res,
+      statusCode: StatusCodes.BAD_REQUEST,
+      message: error.message,
+      success: false,
+    });
+  }
+};
+const toggleAvailabity = async (res, id) => {
+  try {
+    const result = await db(tableConstant.restaurant)
+      .where({ id })
+      .update({isOpen : db.raw('NOT ??',['isOpen'])})
+      
     return result;
   } catch (error) {
     return sendResponse({
@@ -260,4 +278,5 @@ module.exports = {
   OrdersPerRestaurant,
   revenueByDatesOfRestaurant,
   getRestaurantByName,
+  toggleAvailabity
 };

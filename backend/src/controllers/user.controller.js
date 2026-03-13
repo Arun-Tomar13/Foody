@@ -25,17 +25,17 @@ const getProfile = async (req, res) => {
         message: "user does not exists",
       });
 
-    const role = await roleService.getRolesById(res, user[0].role);
+    // const role = await roleService.getRolesById(res, user[0].role);
 
-    if (role.length == 0)
-      sendResponse({
-        res,
-        statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-        message: "internal server error",
-        success: false,
-      });
+    // if (role.length == 0)
+    //   sendResponse({
+    //     res,
+    //     statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+    //     message: "internal server error",
+    //     success: false,
+    //   });
 
-    user[0].role = role[0].name;
+    // user[0].role = role[0].name;
     
     return sendResponse({
       res,
@@ -59,6 +59,9 @@ const updateProfile = async (req, res) => {
     const userId = req.user;
     const data = req.body;
 
+    console.log('profile',data);
+    
+
     if (req.file) data.user_image = req.file.path;
 
     if (!userId)
@@ -78,7 +81,7 @@ const updateProfile = async (req, res) => {
         success: false,
       });
 
-    const updatedUser = await userService.getUserById(res, userId);
+    let updatedUser = await userService.getUserById(res, userId);
 
     return sendResponse({
       res,

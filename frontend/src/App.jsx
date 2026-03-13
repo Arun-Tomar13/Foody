@@ -14,15 +14,14 @@ import Transaction from "./pages/customer/Transactions";
 import Dashboard from "./components/charts/Dashboard";
 import Unauthorized from "./pages/Unauthorized";
 import { useSelector } from "react-redux";
+import { USER_ROLES } from "./constant";
 
 function App() {
   const ProtectedRoute = ({ allowedRoles, children }) => {
     const userRole = useSelector((state)=>state?.users?.user?.role)
-    // const userRole = JSON.parse(localStorage.getItem("role"));
-    console.log('a',allowedRoles.includes(userRole),allowedRoles,userRole);
     
 
-    // if (userRole == "admin" || allowedRoles.includes(userRole))
+    if (userRole ==USER_ROLES.admin || allowedRoles.includes(userRole))
       return children;
 
     return <Navigate to="/unauthorized" />;
@@ -38,7 +37,7 @@ function App() {
         <Route
           path="restaurant"
           element={
-            <ProtectedRoute allowedRoles={["restaurant owner"]}>
+            <ProtectedRoute allowedRoles={[USER_ROLES.restaurent_owner]}>
               <RestaurantDashboard />
             </ProtectedRoute>
           }
@@ -46,7 +45,7 @@ function App() {
         <Route
           path="restaurant/:id"
           element={
-            <ProtectedRoute allowedRoles={["restaurant owner"]}>
+            <ProtectedRoute allowedRoles={[USER_ROLES.restaurent_owner]}>
               <Restaurant />
             </ProtectedRoute>
           }
@@ -54,7 +53,15 @@ function App() {
         <Route
           path="restaurant/:id/category/:categoryid"
           element={
-            <ProtectedRoute allowedRoles={["restaurant owner"]}>
+            <ProtectedRoute allowedRoles={[USER_ROLES.restaurent_owner]}>
+              <CategoryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="restaurant/category/:categoryid"
+          element={
+            <ProtectedRoute allowedRoles={[USER_ROLES.restaurent_owner]}>
               <CategoryPage />
             </ProtectedRoute>
           }
@@ -62,7 +69,7 @@ function App() {
         <Route
           path="order/:id"
           element={
-            <ProtectedRoute allowedRoles={["customer"]}>
+            <ProtectedRoute allowedRoles={[USER_ROLES.customer]}>
               <OrderItems />
             </ProtectedRoute>
           }
@@ -70,7 +77,7 @@ function App() {
         <Route
           path="orders"
           element={
-            <ProtectedRoute allowedRoles={["customer"]}>
+            <ProtectedRoute allowedRoles={[USER_ROLES.customer]}>
               <Order />
             </ProtectedRoute>
           }
@@ -78,7 +85,7 @@ function App() {
         <Route
           path="charts"
           element={
-            <ProtectedRoute allowedRoles={["admin"]}>
+            <ProtectedRoute allowedRoles={[USER_ROLES.admin]}>
               <Dashboard />
             </ProtectedRoute>
           }
@@ -86,7 +93,7 @@ function App() {
         <Route
           path="transactions"
           element={
-            <ProtectedRoute allowedRoles={["customer"]}>
+            <ProtectedRoute allowedRoles={[USER_ROLES.customer]}>
               <Transaction />
             </ProtectedRoute>
           }

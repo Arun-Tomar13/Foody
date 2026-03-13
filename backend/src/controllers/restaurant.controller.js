@@ -8,7 +8,6 @@ const createRestaurant = async (req, res) => {
   try {
     const { name, address, type, openingTime, closingTime } = req.body;
     const userid = req.user;
-    
 
     const isUserAlreadyHasRestro =
       await restaurantService.getRestaurantbyOwnerId(res, userid);
@@ -102,19 +101,17 @@ const createRestaurant = async (req, res) => {
 const updateRestaurant = async (req, res) => {
   try {
     const { name, address, type, openingTime, closingTime } = req.body;
-    const userid = req.user;
     const { id } = req.params;
 
-    // const userHasRestro =
-    //   await restaurantService.getRestaurantbyOwnerId(userid);
+    const userHasRestro = await restaurantService.getRestaurantId(res, id);
 
-    // if (userHasRestro.length == 0)
-    //   return sendResponse({
-    //     res,
-    //     statusCode: StatusCodes.BAD_REQUEST,
-    //     message: responseMessage.hadNotRestaurant,
-    //     success: false,
-    //   });
+    if (userHasRestro.length == 0)
+      return sendResponse({
+        res,
+        statusCode: StatusCodes.BAD_REQUEST,
+        message: responseMessage.hadNotRestaurant,
+        success: false,
+      });
 
     const updatedRestaurantData = await restaurantService.updateRestaurantById(
       res,
@@ -232,45 +229,73 @@ const removeRestaurantById = async (req, res) => {
   }
 };
 
-// // get by userid
-// const getRestaurantInfo = async (req, res) => {
-//   try {
-//     const userid = req.user;
+// get by userid
+const changeAvailability = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-//     const restaurantInfo =
-//       await restaurantService.getRestaurantbyOwnerId(res,userid);
+    let restaurantInfo;
 
-//     if (restaurantInfo.length == 0)
-//       return sendResponse({
-//         res,
-//         statusCode: StatusCodes.BAD_REQUEST,
-//         message: responseMessage.hadNotRestaurant,
-//         success: false,
-//       });
+    if (id) restaurantInfo = await restaurantService.getRestaurantId(res, id);
+    else {
+      const userid = req.user;
 
-//     return sendResponse({
-//       res,
-//       statusCode: StatusCodes.OK,
-//       message: responseMessage.succesInRestaurantInfo,
-//       data: restaurantInfo,
-//     });
-//   } catch (error) {
-//     return sendResponse({
-//       res,
-//       statusCode: StatusCodes.BAD_REQUEST,
-//       message: error.message,
-//       success: false,
-//     });
-//   }
-// };
+      restaurantInfo = await restaurantService.getRestaurantbyOwnerId(
+        res,
+        userid,
+      );
+    }
+
+    if (restaurantInfo.length == 0)
+      return sendResponse({
+        res,
+        statusCode: StatusCodes.BAD_REQUEST,
+        message: responseMessage.hadNotRestaurant,
+        success: false,
+      });
+
+    const isToggled = await restaurantService.toggleAvailabity(res, id);
+
+    if (!isToggled)
+      return sendResponse({
+        res,
+        statusCode: StatusCodes.OK,
+        message: 'error while toggling restro',
+        success:false
+      });
+
+    return sendResponse({
+      res,
+      statusCode: StatusCodes.OK,
+      message: 'restaurant availabity toggled',
+      data: id,
+    });
+  } catch (error) {
+    return sendResponse({
+      res,
+      statusCode: StatusCodes.BAD_REQUEST,
+      message: error.message,
+      success: false,
+    });
+  }
+};
 
 // get Restaurant Info by Id
 const getRestaurantInfoById = async (req, res) => {
   try {
-    console.log("id", req.params);
-    const { id } = req.params;
+    const { id } = req.query;
 
-    const restaurantInfo = await restaurantService.getRestaurantId(res, id);
+    let restaurantInfo;
+
+    if (id) restaurantInfo = await restaurantService.getRestaurantId(res, id);
+    else {
+      const userid = req.user;
+
+      restaurantInfo = await restaurantService.getRestaurantbyOwnerId(
+        res,
+        userid,
+      );
+    }
 
     if (restaurantInfo.length == 0)
       return sendResponse({
@@ -406,7 +431,6 @@ const OrderCountPerRestaurant = async (req, res) => {
 const revenuePerRestaurantByDates = async (req, res) => {
   try {
     const data = await restaurantService.revenueByDatesOfRestaurant(res);
-    
 
     if (data.length == 0)
       return sendResponse({
@@ -424,11 +448,11 @@ const revenuePerRestaurantByDates = async (req, res) => {
       data[key].date = formatSqlTimestamp(data[key].date);
       if (!dateArr.includes(data[key].date)) dateArr.push(data[key].date);
     }
-    
+
     dateArr.sort((a, b) => {
       const dateA = new Date(a);
       const dateB = new Date(b);
-      
+
       return dateA - dateB;
     });
 
@@ -450,12 +474,11 @@ const revenuePerRestaurantByDates = async (req, res) => {
 
     let i = 0;
     dataArr.forEach((item) => {
-      
       for (let date of dateArr) {
         if (item.date.includes(date)) {
-          let amount=0;
-          for(let i in item.date){
-            if(item.date[i]==date) amount +=item.revenue[i]
+          let amount = 0;
+          for (let i in item.date) {
+            if (item.date[i] == date) amount += item.revenue[i];
           }
           newData[i].data.push(amount);
         } else newData[i].data.push(0);
@@ -489,6 +512,7 @@ module.exports = {
   getMenuCountPerRestaurant,
   OrderCountPerRestaurant,
   revenuePerRestaurantByDates,
+  changeAvailability,
   // getRestaurantInfo,
   // createRestaurantByAnyOne,
 };

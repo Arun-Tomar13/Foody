@@ -16,7 +16,7 @@ import { Link, useParams } from "react-router";
 import AddCategoryInBulk from "./AddCategoryInBulk";
 import CustomSnackbar from "./CustomSnackbar";
 
-const AllCategories = ({ id }) => {
+const AllCategories = ({ id=null }) => {
   const dispatch = useDispatch();
 
   const [openforAdd, setOpenforAdd] = useState(false);
@@ -49,7 +49,12 @@ const AllCategories = ({ id }) => {
 
   useEffect(() => {
     const fetchCategory = async () => {
-      const result = await dispatch(getAllCategories(id));
+      let result;
+      console.log('aas',id);
+      
+      if(id) result = await dispatch(getAllCategories({id}));
+      else result = await dispatch(getAllCategories({}));
+      
     };
     fetchCategory();
   }, []);
@@ -116,7 +121,7 @@ const AllCategories = ({ id }) => {
       sortable: false,
       width: "100",
       renderCell: (params) => (
-        <Link to={`/restaurant/${id}/category/${params.row.id}`}>menu</Link>
+        <Link to={`/restaurant${id ? `/${id}` : ''}/category/${params.row.id}`}>menu</Link>
       ),
     },
   ];
@@ -166,7 +171,8 @@ const AllCategories = ({ id }) => {
             <AddCategoryForm
               fn={addCategory}
               close={handleClose}
-              data={{ name: "", description: "", restaurant_id: id }}
+              data={{ name: "", description: "" }}
+              restaurant_id= {id ? id : null}
             />
           }
         />

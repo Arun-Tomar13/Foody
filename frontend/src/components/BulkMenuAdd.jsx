@@ -37,8 +37,6 @@ const BulkMenuAdd = ({ close }) => {
     if (file) formData.append("menu", file);
 
     const result = await dispatch(bulkMenuAdd( param.id ? {formData,restaurant_id:param.id} : {formData}));
-    console.log('rr',result);
-    
 
     if (result.payload.success) {
       close();

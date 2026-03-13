@@ -1,15 +1,14 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import {
   createRestaurantApi,
-  createRestaurantByAnyoneApi,
   getAllRestauarntsApi,
-  getRestauarntInfoApi,
   getRestauarntInfoByIdApi,
   MenuPerRestaurantApi,
   orderAndRevenuePerRestaurantApi,
   removeRestaurantApi,
   removeRestaurantByIdApi,
   revenuePerRestaurantApi,
+  toggleAvailabilty,
   updateRestaurantApi,
 } from "../../lib/api/restaurantApi";
 
@@ -73,7 +72,7 @@ export const orderAndRevenuePerRestaurant = createAsyncThunk(
 
 export const revenuePerRestaurant = createAsyncThunk(
   "restaurant/revenue",
-  async (data='', { rejectWithValue, dispatch, fulfillWithValue }) => {
+  async (data = "", { rejectWithValue, dispatch, fulfillWithValue }) => {
     // dispatch(startLoading());
     // const res = await createRestaurantByAnyoneApi(data);
     const res = await revenuePerRestaurantApi();
@@ -93,6 +92,19 @@ export const updateRestaurant = createAsyncThunk(
   async (data, { rejectWithValue, dispatch }) => {
     // dispatch(startLoading());
     const res = await updateRestaurantApi(data);
+    // dispatch(stopLoading());
+    if (res.error) {
+      return rejectWithValue(res.error);
+    }
+    return res.data;
+  },
+);
+
+export const changeRestaurantAvailability = createAsyncThunk(
+  "restaurant/toggle",
+  async (data, { rejectWithValue, dispatch }) => {
+    // dispatch(startLoading());
+    const res = await toggleAvailabilty(data);
     // dispatch(stopLoading());
     if (res.error) {
       return rejectWithValue(res.error);
@@ -188,6 +200,7 @@ const restaurantSlice = createSlice({
 
         if (action.payload.success) {
           state.restaurantList.push(action.payload.data[0]);
+          state.restaurant = action.payload.data[0];
         } else {
           state.error = action.payload;
         }
@@ -245,55 +258,76 @@ const restaurantSlice = createSlice({
       .addCase(getRestaurantInfoById.rejected, (state) => {
         state.loading = false;
       })
-    .addCase(MenuPerRestaurant.pending, (state) => {
-      state.loading = true;
-      state.error = null;
-    })
-    .addCase(MenuPerRestaurant.fulfilled, (state, action) => {
-      state.loading = false;
+      .addCase(MenuPerRestaurant.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(MenuPerRestaurant.fulfilled, (state, action) => {
+        state.loading = false;
 
-      if (action.payload.success) {
-        // state.menuCount = action.payload.data;
-      } else {
-        state.error = action.payload;
-      }
-    })
-    .addCase(MenuPerRestaurant.rejected, (state) => {
-      state.loading = false;
-    })
-    .addCase(orderAndRevenuePerRestaurant.pending, (state) => {
-      state.loading = true;
-      state.error = null;
-    })
-    .addCase(orderAndRevenuePerRestaurant.fulfilled, (state, action) => {
-      state.loading = false;
+        if (action.payload.success) {
+          // state.menuCount = action.payload.data;
+        } else {
+          state.error = action.payload;
+        }
+      })
+      .addCase(MenuPerRestaurant.rejected, (state) => {
+        state.loading = false;
+      })
+      .addCase(orderAndRevenuePerRestaurant.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(orderAndRevenuePerRestaurant.fulfilled, (state, action) => {
+        state.loading = false;
 
-      if (action.payload.success) {
-        // state.menuCount = action.payload.data;
-      } else {
-        state.error = action.payload;
-      }
-    })
-    .addCase(orderAndRevenuePerRestaurant.rejected, (state) => {
-      state.loading = false;
-    })
-    .addCase(getAllRestaurant.pending, (state) => {
-      state.loading = true;
-      state.error = null;
-    })
-    .addCase(getAllRestaurant.fulfilled, (state, action) => {
-      state.loading = false;
+        if (action.payload.success) {
+          // state.menuCount = action.payload.data;
+        } else {
+          state.error = action.payload;
+        }
+      })
+      .addCase(orderAndRevenuePerRestaurant.rejected, (state) => {
+        state.loading = false;
+      })
+      .addCase(getAllRestaurant.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getAllRestaurant.fulfilled, (state, action) => {
+        state.loading = false;
 
-      if (action.payload.success) {
-        state.restaurantList = action.payload.data
-      } else {
-        state.error = action.payload;
-      }
-    })
-    .addCase(getAllRestaurant.rejected, (state) => {
-      state.loading = false;
-    });
-    },
+        if (action.payload.success) {
+          state.restaurantList = action.payload.data;
+        } else {
+          state.error = action.payload;
+        }
+      })
+      .addCase(getAllRestaurant.rejected, (state) => {
+        state.loading = false;
+      })
+      .addCase(changeRestaurantAvailability.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(changeRestaurantAvailability.fulfilled, (state, action) => {
+        state.loading = false;
+
+        if (action.payload.success) {
+          state.restaurant.isOpen = !state.restaurant.isOpen;
+          state.restaurantList = state.restaurantList.map((restaurant) => {
+            return restaurant.id == action.payload.data
+              ? { ...restaurant, isOpen: !restaurant.isOpen }
+              : restaurant;
+          });
+        } else {
+          state.error = action.payload;
+        }
+      })
+      .addCase(changeRestaurantAvailability.rejected, (state) => {
+        state.loading = false;
+      });
+  },
 });
 
 export default restaurantSlice.reducer;

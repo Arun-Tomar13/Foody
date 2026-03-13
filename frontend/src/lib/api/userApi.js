@@ -1,38 +1,37 @@
-import { axiosInstance, axiosInstanceWithoutAuth } from "../axios"
+import { axiosInstance, axiosInstanceWithoutAuth } from "../axios";
 
-const login = async (data)=>{
-    const user = await axiosInstanceWithoutAuth.post('/auth/login',data)
-    
-    return user;
-}
+const login = async (data) => {
+  const user = await axiosInstanceWithoutAuth.post("/auth/login", data);
 
-const logout = async (data)=>{
-    const user = await axiosInstance.post('/auth/logout',data)
-    return user;
-}
+  return user;
+};
 
-const register = async (data)=>{
-    console.log("api",data);
-    
-    const user = await axiosInstanceWithoutAuth.post('/auth/register',data)
-    return user;
-}
+const logout = async (data) => {
+  const user = await axiosInstance.post("/auth/logout", data);
+  return user;
+};
 
-const getUserProfile = async ()=>{
-    const result = await axiosInstance.get('/user')
-    console.log('result');
-    
-    return result
-}
+const register = async (data) => {
+  const user = await axiosInstanceWithoutAuth.post("/auth/register", data);
+  return user;
+};
 
-const getRoles  = async()=>{
-    const result = await axiosInstance.get('/getroles')
-    return result;
-}
+const getUserProfile = async () => {
+  const result = await axiosInstance.get("/user");
 
-const updateUserProfile  = async(data)=>{
-    const result = await axiosInstance.patch('/user',data,{headers: { "Content-Type": "multipart/form-data"}})
-    return result;
-}
+  return result;
+};
 
-export {login,register,getUserProfile,updateUserProfile,getRoles,logout}
+const getRoles = async () => {
+  const result = await axiosInstance.get("/getroles");
+  return result;
+};
+
+const updateUserProfile = async (data) => {
+  const result = await axiosInstance.patch("/user", data, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return result;
+};
+
+export { login, register, getUserProfile, updateUserProfile, getRoles, logout };
