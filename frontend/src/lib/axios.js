@@ -1,5 +1,5 @@
 import axios from "axios";
-// const Bearer = JSON.parse(localStorage.getItem('Bearer')) || {}
+import { useNavigate } from "react-router";
 
 export const axiosInstance = axios.create({
     baseURL:'http://localhost:8000/api',
@@ -11,6 +11,8 @@ export const axiosInstance = axios.create({
 export const axiosInstanceWithoutAuth = axios.create({
     baseURL:'http://localhost:8000/api'
 })
+
+
 axiosInstance.interceptors.request.use(config => {
   const Bearer = JSON.parse(localStorage.getItem('Bearer'));
   
@@ -19,3 +21,17 @@ axiosInstance.interceptors.request.use(config => {
   }
   return config;
 });
+
+axiosInstance.interceptors.response.use(function onFulfilled(response) {
+     if(!response.data.success && (response.data.message=='invalid token' || response.data.message=='Unauthorized user')){ 
+
+      if(window.location.pathname!='/login') window.location.href = '/login'
+      
+      return response;
+     }
+     return response;
+  }, function onRejected(error) {
+    // Any status codes that falls outside the range of 2xx cause this function to trigger
+    // Do something with response error
+    return Promise.reject(error);
+  });

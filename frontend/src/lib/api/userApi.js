@@ -23,7 +23,9 @@ const getUserProfile = async () => {
 };
 
 const getRoles = async () => {
-  const result = await axiosInstance.get("/getroles");
+  const result = await axiosInstanceWithoutAuth.get("/getroles");
+  console.log(result);
+  
   return result;
 };
 

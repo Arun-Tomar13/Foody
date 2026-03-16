@@ -7,6 +7,7 @@ import {
   getAllMenuApi,
   BulkMenuAddApi,
 } from "../../lib/api/menuApi";
+import { toast } from "react-toastify";
 
 const initialState = {
   menuList: [],
@@ -116,8 +117,9 @@ const menuSlice = createSlice({
       .addCase(addMenu.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload.success) {
+          toast.success(action.payload.message);
           state.menuList.push(action.payload.data)
-            state.totalMenu = state.totalMenu + 1
+          state.totalMenu = state.totalMenu + 1
         } else {
           state.error = action.payload
         }
@@ -132,6 +134,7 @@ const menuSlice = createSlice({
       .addCase(bulkMenuAdd.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload.success) {
+          toast.success(action.payload.message);
         } else {
           state.error = action.payload
         }
@@ -146,6 +149,7 @@ const menuSlice = createSlice({
       .addCase(updateMenu.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload.success) {
+          toast.success(action.payload.message);
           state.menuList = state.menuList.map((item) => {
             return item.id == action.payload.data[0].id
               ? {
@@ -155,6 +159,7 @@ const menuSlice = createSlice({
                   description: action.payload.data[0].description,
                   type: action.payload.data[0].type,
                   image: action.payload.data[0].image,
+                  isAvailable: action.payload.data[0].isAvailable,
                 }
               : item;
           });
@@ -172,6 +177,7 @@ const menuSlice = createSlice({
       .addCase(removeMenu.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload.success) {
+          toast.success(action.payload.message);
           ((state.menuList = state.menuList.filter(
             (item) => item.id != action.payload.data,
           )),

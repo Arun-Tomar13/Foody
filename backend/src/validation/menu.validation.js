@@ -7,6 +7,7 @@ const createMenuSchema = Joi.object({
   image: Joi.string().required(),
   price: Joi.string().required(),
   category_id: Joi.number().positive().required(),
+  isAvailable: Joi.number().required(),
 });
 const updateMenuSchema = Joi.object({
   name: Joi.string().required(),

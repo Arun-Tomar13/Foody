@@ -7,6 +7,7 @@ import {
 } from "../../lib/api/userApi";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { startLoading, stopLoading } from "./commonSlice";
+import { toast } from "react-toastify";
 
 const initialState = {
   user: null,
@@ -98,6 +99,7 @@ const UserSlice = createSlice({
       .addCase(addUser.fulfilled, (state, action) => {
         state.loading = false;
         if (!action.payload.success) state.error = action.payload;
+        else toast.success(action.payload.message);
       })
       .addCase(addUser.rejected, (state) => {
         state.loading = false;
@@ -109,7 +111,7 @@ const UserSlice = createSlice({
       .addCase(logoutUser.fulfilled, (state, action) => {
         state.loading = false;
         action.payload.success
-          ? (state.user = {})
+          ? toast.success(action.payload.message)
           : (state.error = action.payload);
       })
       .addCase(logoutUser.rejected, (state) => {
@@ -123,13 +125,10 @@ const UserSlice = createSlice({
         state.loading = false;
         if (action.payload.success) {
           state.user = action.payload.data.updatedUser[0];
+          toast.success(action.payload.message);
           localStorage.setItem(
             "Bearer",
             JSON.stringify(action.payload.data.accessToken),
-          );
-          localStorage.setItem(
-            "role",
-            JSON.stringify(action.payload.data.role),
           );
         } else state.error = action.payload;
       })
@@ -147,7 +146,7 @@ const UserSlice = createSlice({
           : (state.error = action.payload);
       })
       .addCase(getProfile.rejected, (state) => {
-        state.loading = true;
+        state.loading = false;
       })
       .addCase(updateProfile.pending, (state) => {
         state.error = null;
@@ -155,12 +154,13 @@ const UserSlice = createSlice({
       })
       .addCase(updateProfile.fulfilled, (state, action) => {
         state.loading = false;
-        action.payload.success
-          ? (state.user = action.payload.data[0])
-          : (state.error = action.payload);
+        if (action.payload.success) {
+          state.user = action.payload.data[0];
+          toast.success(action.payload.message);
+        } else state.error = action.payload;
       })
       .addCase(updateProfile.rejected, (state) => {
-        state.loading = true;
+        state.loading = false;
       });
   },
 });

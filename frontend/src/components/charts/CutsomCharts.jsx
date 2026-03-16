@@ -3,6 +3,7 @@ import {
   Series,
   Subtitle,
   Title,
+  Tooltip,
   XAxis,
   YAxis,
 } from "@highcharts/react";
@@ -20,7 +21,7 @@ const CutsomCharts = ({
   name,
   props = {},
 }) => {
-  // console.log("1");
+  console.log("1",data);
 
   // if (type === "line") {
   //   console.log("data in line 1", data);
@@ -38,7 +39,7 @@ const CutsomCharts = ({
       <YAxis categories={yData}>{yName}</YAxis>
       {data.map((item, index) => {
         return (
-          <Series type={type} data={item.data} name={item.name} key={index} />
+          <Series type={type} data={item.data} key={index} options={{name:item.name,id:index}} />
         );
       })}
     </Chart>

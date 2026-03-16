@@ -14,6 +14,7 @@ import ShowError from "./ShowError";
 import {  useParams } from "react-router"
 
 const AddMenuItemForm = ({forAdd, data, fn, close }) => {
+console.log(data);
 
   const schema = yup
     .object({
@@ -33,7 +34,9 @@ const AddMenuItemForm = ({forAdd, data, fn, close }) => {
   
   const dispatch = useDispatch();
   const [file, setFile] = useState(null);
+  const [available, setAvailable] = useState(0);
   const [updateImage, setUpdateImage] = useState(false);
+  
 
   const {
     control,
@@ -45,6 +48,7 @@ console.log(errors);
 
   useEffect(() => {
     reset(data);
+    setAvailable(data.isAvailable)
   }, []);
 
   const onSubmit = async (data) => {
@@ -53,6 +57,8 @@ console.log(errors);
     
     const formData = new FormData()
     if(file) formData.append("image",file)
+
+    data.isAvailable=available
 
     for(let key in data){
       formData.append(`${key}`,data[key])
@@ -66,12 +72,13 @@ console.log(errors);
       close();
     }
   };
+  
 
   return (
     <Box padding={2}>
       <AFormProvider onSubmit={handleSubmit(onSubmit)}>
-        <Grid container spacing={2} direction="column" className="d-flex">
-           <Grid size={{md:6}} className='d-flex flex-column' >
+        <Grid container spacing={2} direction="column">
+           <Grid size={12} container direction='column' justifyContent='center' alignItems='center' >
             { (forAdd || updateImage) && (
 
               <input
@@ -87,12 +94,21 @@ console.log(errors);
                 src={ `http://localhost:8000/${data?.image}`}
                 alt="user Img"
                 width="100px"
-                className="contains"
               />
             )}
 
             { !forAdd &&  <Switch onChange={(e)=>setUpdateImage(e.target.checked)} />}
+            <Grid>
+              {available ? 'Available' : "Not available"}
+              <Switch
+              value={available}
+              onChange={()=>{setAvailable((prev)=> prev ? 0 : 1)}}
+              name="isAvailable"
+              color="secondary"
+            />
+            </Grid>
           </Grid> 
+
 
           <Grid>
             <TextInput

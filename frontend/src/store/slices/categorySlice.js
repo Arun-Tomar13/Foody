@@ -7,6 +7,8 @@ import {
   getCategoryByIdApi,
   updateCategoryApi,
 } from "../../lib/api/categoryApi";
+import { toast } from "react-toastify";
+
 
 const initialState = {
   category: null,
@@ -118,6 +120,7 @@ const categorySlice = createSlice({
       .addCase(addCategory.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload.success) {
+          toast.success(action.payload.message);
           state.categoryList.push(action.payload.data[0]);
         } else {
           state.error = action.payload;
@@ -132,9 +135,9 @@ const categorySlice = createSlice({
       })
       .addCase(bulkUpload.fulfilled, (state, action) => {
         state.loading = false;
-        console.log(action.payload.data);
         
         if (action.payload.success) {
+          toast.success(action.payload.message);
           action.payload.data.forEach((data) => {
             state.categoryList.push(data);
           });
@@ -152,6 +155,7 @@ const categorySlice = createSlice({
       .addCase(removeCategory.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload.success) {
+          toast.success(action.payload.message);
           state.categoryList = state.categoryList.filter(
             (r) => r.id != action.payload.data,
           );
@@ -169,12 +173,14 @@ const categorySlice = createSlice({
       .addCase(updateCategory.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload.success) {
+          toast.success(action.payload.message);
           state.categoryList = state.categoryList.map((item) => {
             return item.id == action.payload.data[0].id
               ? {
                   ...item,
                   name: action.payload.data[0].name,
                   description: action.payload.data[0].description,
+                  isAvailable: action.payload.data[0].isAvailable,
                 }
               : item;
           });

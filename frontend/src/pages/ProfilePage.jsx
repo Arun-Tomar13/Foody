@@ -54,7 +54,7 @@ const ProfilePage = ({ close }) => {
   } = useForm({ resolver: yupResolver(schema), disabled: readOnly });
 
   const { user, error, loading } = useSelector((state) => state.users);
-
+  
   useEffect(() => {
     if (error) {
       setOpen(true);

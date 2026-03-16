@@ -31,7 +31,6 @@ const Navbar = () => {
   }, [error]);
 
   useEffect(() => {
-    dispatch(getProfile());
     dispatch(getAllCart());
   }, []);
 

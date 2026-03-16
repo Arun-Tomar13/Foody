@@ -98,6 +98,32 @@ const getMenuItemById = async (res, itemId) => {
   }
 };
 
+const getMenuItemByName = async (res, name,restaurant_id) => {
+  try {
+    const result = await db(tableConstant.menu)
+      .where({name,restaurant_id })
+      .select(
+        "id",
+        "type",
+        "description",
+        "isAvailable",
+        "name",
+        "price",
+        "restaurant_id",
+        "category_id",
+        "image",
+      );
+    return result;
+  } catch (error) {
+    return sendResponse({
+      res,
+      statusCode: StatusCodes.BAD_REQUEST,
+      message: error.message,
+      success: false,
+    });
+  }
+};
+
 const updateMenuItem = async (res, data) => {
   try {
     
@@ -135,5 +161,6 @@ module.exports = {
   getMenuItemById,
   removeMenuItem,
   getAllMenuItem,
-  getMenuByName
+  getMenuByName,
+  getMenuItemByName
 };

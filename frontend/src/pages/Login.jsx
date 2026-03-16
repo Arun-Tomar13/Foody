@@ -1,4 +1,4 @@
-import { Grid, Button, Snackbar, Alert, CircularProgress } from "@mui/material";
+import { Grid, Button, CircularProgress } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -53,9 +53,9 @@ const Login = () => {
 
   return (
     // Main container
-    <Grid container p={10}>
+    <Grid container padding={2} spacing={2} >
       {/* Left Side */}
-      <Grid size={{ md: 4, sm: 12 }} className="d-flex align-items-center">
+      <Grid size={{ md: 4, sm: 12 }} padding={3} className="d-flex align-items-center">
         {/* Form */}
         <AFormProvider onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={2}>
@@ -112,7 +112,7 @@ const Login = () => {
 
       {/* Right Side  */}
       <Grid size={{ md: 8, sm: 12 }}>
-        <video width='65%' src="/home.mp4" autoPlay loop />
+        <video width='60%' src="/home.mp4" autoPlay loop />
       </Grid>
     </Grid>
   );

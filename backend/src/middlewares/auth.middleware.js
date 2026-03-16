@@ -11,7 +11,7 @@ const auth = () => {
         return sendResponse({
           res,
           statusCode: StatusCodes.UNAUTHORIZED,
-          message: 'Bearer token is not present',
+          message: 'invalid token',
           success: false,
         });
 

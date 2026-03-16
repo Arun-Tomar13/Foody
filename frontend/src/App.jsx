@@ -13,19 +13,21 @@ import RestaurantDashboard from "./pages/Restaurant/RestaurantDashboard";
 import Transaction from "./pages/customer/Transactions";
 import Dashboard from "./components/charts/Dashboard";
 import Unauthorized from "./pages/Unauthorized";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { USER_ROLES } from "./constant";
+import { useEffect } from "react";
+import { getProfile } from "./store/slices/userSlice";
+import ProtectedRoute from "./pages/ProtectedRoute";
 
 function App() {
-  const ProtectedRoute = ({ allowedRoles, children }) => {
-    const userRole = useSelector((state)=>state?.users?.user?.role)
-    
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
 
-    if (userRole ==USER_ROLES.admin || allowedRoles.includes(userRole))
-      return children;
-
-    return <Navigate to="/unauthorized" />;
-  };
+  // error
+  useEffect(() => {
+     dispatch(getProfile());
+    if(localStorage.getItem('Bearer')?.trim()=='') navigate("/login");
+  }, []);
 
   return (
     <Routes>
@@ -37,7 +39,7 @@ function App() {
         <Route
           path="restaurant"
           element={
-            <ProtectedRoute allowedRoles={[USER_ROLES.restaurent_owner]}>
+            <ProtectedRoute allowedRoles={[USER_ROLES.restaurent_owner,USER_ROLES.admin]}>
               <RestaurantDashboard />
             </ProtectedRoute>
           }
@@ -45,7 +47,7 @@ function App() {
         <Route
           path="restaurant/:id"
           element={
-            <ProtectedRoute allowedRoles={[USER_ROLES.restaurent_owner]}>
+            <ProtectedRoute allowedRoles={[USER_ROLES.admin]}>
               <Restaurant />
             </ProtectedRoute>
           }
@@ -53,7 +55,7 @@ function App() {
         <Route
           path="restaurant/:id/category/:categoryid"
           element={
-            <ProtectedRoute allowedRoles={[USER_ROLES.restaurent_owner]}>
+            <ProtectedRoute allowedRoles={[USER_ROLES.restaurent_owner,USER_ROLES.admin]}>
               <CategoryPage />
             </ProtectedRoute>
           }
@@ -61,7 +63,7 @@ function App() {
         <Route
           path="restaurant/category/:categoryid"
           element={
-            <ProtectedRoute allowedRoles={[USER_ROLES.restaurent_owner]}>
+            <ProtectedRoute allowedRoles={[USER_ROLES.restaurent_owner,USER_ROLES.admin]}>
               <CategoryPage />
             </ProtectedRoute>
           }
@@ -99,8 +101,8 @@ function App() {
           }
         />
         <Route path="*" element={<Unauthorized />} />
-        <Route path="unauthorized" element={<Unauthorized />} />
       </Route>
+        <Route path="unauthorized" element={<Unauthorized />} />
     </Routes>
   );
 }

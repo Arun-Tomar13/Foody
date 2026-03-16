@@ -200,9 +200,7 @@ const removeRestaurantById = async (req, res) => {
     const { id } = req.params;
 
     const userHasRestro = await restaurantService.getRestaurantId(res, id);
-
-    console.log(userHasRestro);
-
+    
     if (userHasRestro.length == 0)
       return sendResponse({
         res,

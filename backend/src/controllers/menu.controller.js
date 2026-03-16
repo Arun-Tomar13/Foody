@@ -19,7 +19,7 @@ const { type } = require("os");
 // Add category
 const addItemToMenu = async (req, res) => {
   try {
-    const { name, description, type, price, category_id } = req.body;
+    const { name, description, type,isAvailable, price, category_id } = req.body;
     const { restaurant_id } = req.query;
     let hasRestraurant;
     if (restaurant_id) hasRestraurant = await restaurantService.getRestaurantId(res,restaurant_id);
@@ -35,6 +35,15 @@ const addItemToMenu = async (req, res) => {
         message: responseMessage.hadNotRestaurant,
         success: false,
       });
+      
+      const isItemExists = await menuService.getMenuItemByName(res,name,hasRestraurant[0].id)
+      if (isItemExists.length > 0)
+        return sendResponse({
+          res,
+          statusCode: StatusCodes.BAD_REQUEST,
+          message:`${name} already exists`,
+          success: false,
+        });
 
     const result = await menuService.addMenuItem(res, {
       name,
@@ -44,6 +53,7 @@ const addItemToMenu = async (req, res) => {
       restaurant_id:hasRestraurant[0].id,
       category_id,
       image: req.file.path,
+      isAvailable
     });
 
     if (result.length == 0)
@@ -388,7 +398,7 @@ const bulkUploadItemToMenu = async (req, res) => {
 const updateMenuItem = async (req, res) => {
   try {
     // const userid = req.user;
-    let { id, name, description, type, price, image } = req.body;
+    let { id, name,isAvailable, description, type, price, image } = req.body;
     console.log(req.body);
 
     // const hasRestraurant =
@@ -406,12 +416,9 @@ const updateMenuItem = async (req, res) => {
     if (!req.file) {
       const item = await menuService.getMenuItemById(res, id);
       image = item[0].image;
-      console.log("menu", item[0]);
     } else {
-      console.log("image before", image);
       image = req.file.path;
     }
-    console.log("image after", image);
 
     const isitemUpdat = await menuService.updateMenuItem(res, {
       id,
@@ -420,6 +427,7 @@ const updateMenuItem = async (req, res) => {
       description,
       type,
       image,
+      isAvailable
     });
 
     if (!isitemUpdat)
@@ -574,7 +582,13 @@ const getMenuItem = async (req, res) => {
         });
     }
 
-    const totalPages = await await db(tableConstant.menu).where(function () {
+    let totalPages;
+
+    if(!data.restaurant_id && !data.category_id && !data.query){
+      totalPages = await db(tableConstant.menu)
+    .join('restaurants','menu.restaurant_id','=','restaurants.id')
+    .join('category','menu.category_id','=','category.id')
+    .where(function () {
       if (data.category_id) {
         this.where("category_id", data.category_id);
       }
@@ -584,17 +598,38 @@ const getMenuItem = async (req, res) => {
       if (data.query) {
         this.where("name", "like", `%${data.query}%`);
       }
-    });
+    })
+    .distinct('menu.id as id')
+    .select('category_id','menu.description as description','image','menu.isAvailable as isAvailable','menu.name as name','price','menu.type as type','restaurants.isOpen as isRestaurantOpen','category.isAvailable as isCategoryOpen')
+    }
+    else{
+      totalPages = await db(tableConstant.menu)
+    .where(function () {
+      if (data.category_id) {
+        this.where("category_id", data.category_id);
+      }
+      if (data.restaurant_id) {
+        this.where("restaurant_id", data.restaurant_id);
+      }
+      if (data.query) {
+        this.where("name", "like", `%${data.query}%`);
+      }
+    })
+    }
 
     const totalMenu = totalPages.length;
 
     menu = await menuService.getAllMenuItem(res, data);
 
+    // if(!data.restaurant_id && !data.category_id){
+    //   menu = menu.filter(item=>item.isAvailable==1)
+    // }
+
     return sendResponse({
       res,
       statusCode: StatusCodes.CREATED,
       message: "menu fetched successfully",
-      data: { menu, totalMenu },
+      data: { menu:(data.restaurant_id && data.category_id) ? menu : totalPages, totalMenu },
     });
   } catch (error) {
     return sendResponse({

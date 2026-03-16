@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addUser } from "../store/slices/userSlice";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Alert, Button, CircularProgress, Grid, Snackbar } from "@mui/material";
+import {  Button, CircularProgress, Grid, Snackbar } from "@mui/material";
 import SelectInput from "../components/InputFields/SelectInput";
 import { useNavigate } from "react-router";
 import { Link } from "react-router";
@@ -22,6 +22,7 @@ import { useEffect } from "react";
 import { useState } from "react";
 import AFormProvider from "../components/FormProvider";
 import { getRoles } from "../lib/api/userApi";
+import CustomSnackbar from "../components/CustomSnackbar";
 
 // yup
 const schema = yup
@@ -89,12 +90,9 @@ const Register = () => {
 
   // onsubmit fn (Register)
   const onSubmit = async (data) => {
-    console.log("data", data);
-    console.log("error", errors);
     let response = await dispatch(addUser(data));
 
     if (response.payload.success) navigate("/login");
-    console.log(response);
   };
 
   return (

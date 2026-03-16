@@ -33,6 +33,23 @@ const getUserByEmail = async (res,userEmail) => {
     });
  }
 };
+const getUserByEmailOrMobileNo = async (res,userEmail,mobile) => {
+ try {
+   const userData = await db("users").where(function(){
+     this.where('email',userEmail)
+     .orWhere('phone',mobile)
+   });
+ 
+   return userData;
+ } catch (error) {
+  return sendResponse({
+      res,
+      statusCode: StatusCodes.BAD_REQUEST,
+      message: error.message,
+      success: false,
+    });
+ }
+};
 
 const updateUserByEmail = async (res,userEmail, updateData) => {
   try {
@@ -108,4 +125,4 @@ const removeUserById = async (res,userId) => {
 };
 
 
-module.exports = { getUserByEmail, updateUserByEmail,createUser, getUserById,updateUserById,removeUserById };
+module.exports = { getUserByEmail, updateUserByEmail,createUser, getUserById,updateUserById,removeUserById,getUserByEmailOrMobileNo };

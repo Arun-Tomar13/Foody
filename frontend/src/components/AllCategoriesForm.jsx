@@ -23,7 +23,7 @@ const AllCategories = ({ id=null }) => {
   const [openforBulkUpload, setOpenforBulkUpload] = useState(false);
   const [openForUpdate, setOpenforUpdate] = useState(false);
   const [open, setOpen] = useState(false);
-  const {categoryList, error } = useSelector((state) => state.category);
+  const {categoryList, error,loading } = useSelector((state) => state.category);
 
   const handleClickOpenForAdd = () => {
     setOpenforAdd(true);
@@ -50,7 +50,6 @@ const AllCategories = ({ id=null }) => {
   useEffect(() => {
     const fetchCategory = async () => {
       let result;
-      console.log('aas',id);
       
       if(id) result = await dispatch(getAllCategories({id}));
       else result = await dispatch(getAllCategories({}));
@@ -61,7 +60,6 @@ const AllCategories = ({ id=null }) => {
 
   const handleDelete = async (id) => {
     const result = await dispatch(removeCategory(id));
-    console.log(result);
   };
 
   const { category } = useSelector((state) => state.category);
@@ -84,6 +82,7 @@ const AllCategories = ({ id=null }) => {
       headerName: "Available",
       sortable: false,
       width: "100",
+      renderCell: (params) => params.row.isAvailable ? 'yes' : 'no'
     },
     {
       field: "edit",
@@ -171,7 +170,7 @@ const AllCategories = ({ id=null }) => {
             <AddCategoryForm
               fn={addCategory}
               close={handleClose}
-              data={{ name: "", description: "" }}
+              data={{ name: "", description: "",isAvailable:1 }}
               restaurant_id= {id ? id : null}
             />
           }
@@ -202,6 +201,7 @@ const AllCategories = ({ id=null }) => {
               },
             },
           }}
+          loading={loading}
           pageSizeOptions={[5]}
           disableRowSelectionOnClick
         />

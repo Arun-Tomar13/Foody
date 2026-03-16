@@ -59,9 +59,6 @@ const updateProfile = async (req, res) => {
     const userId = req.user;
     const data = req.body;
 
-    console.log('profile',data);
-    
-
     if (req.file) data.user_image = req.file.path;
 
     if (!userId)

@@ -70,6 +70,7 @@ const AllRestaurantList = () => {
       field: "isOpen",
       headerName: "Availability",
       sortable: false,
+      renderCell:(params)=> params.row.isOpen ? 'open' : 'close'
     },
     {
       field: "openingTime",

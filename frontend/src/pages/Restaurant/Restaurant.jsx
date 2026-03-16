@@ -1,4 +1,4 @@
-import { Grid, Button, Switch } from "@mui/material";
+import { Grid, Button, Switch, Box, CircularProgress } from "@mui/material";
 import { useEffect, useState } from "react";
 import FormProvider from "../../components/FormProvider";
 import * as yup from "yup";
@@ -40,7 +40,7 @@ const RestroOwner = () => {
   const params = useParams();
   const [showCategory, setShowCategory] = useState(false);
 
-  const { restaurant } = useSelector((state) => state?.restaurant);
+  const { restaurant,loading } = useSelector((state) => state?.restaurant);
 
   const {
     control,
@@ -56,6 +56,7 @@ const RestroOwner = () => {
       if (params.id)
         r = await dispatch(getRestaurantInfoById({ id: params.id }));
       else r = await dispatch(getRestaurantInfoById({}));
+      
     };
     getRestaurantData();
   }, []);
@@ -85,6 +86,10 @@ const RestroOwner = () => {
 
     setReadOnly((prev) => !prev);
   };
+
+  if(loading) return <Grid container size={12} height={700} justifyContent='center' alignItems='center' >
+    <CircularProgress/>
+  </Grid>
 
   return (
     <div>

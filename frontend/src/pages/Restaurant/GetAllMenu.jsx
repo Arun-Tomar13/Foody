@@ -9,6 +9,7 @@ import {
   MenuItem,
   InputLabel,
   FormControl,
+  Switch,
 } from "@mui/material";
 import { DeleteIcon, Pen, Plus } from "lucide-react";
 import {
@@ -35,7 +36,7 @@ const GetAllMenu = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
 
-  const { menuItem, menuList, totalMenu, error } = useSelector(
+  const { menuItem, menuList, totalMenu, error, loading } = useSelector(
     (state) => state.menu,
   );
   const { categoryList } = useSelector((state) => state.category);
@@ -145,6 +146,7 @@ const GetAllMenu = () => {
       field: "isAvailable",
       headerName: "Available",
       sortable: false,
+      renderCell: (params) => <div>{params.row.isAvailable ? 'Yes' : "No"}</div>
     },
     {
       field: "edit",
@@ -262,6 +264,7 @@ const GetAllMenu = () => {
                 type: "",
                 price: "",
                 category_id: categoryid,
+                isAvailable:1
               }}
             />
           }
@@ -295,6 +298,7 @@ const GetAllMenu = () => {
           }}
           pageSizeOptions={[2, 4, 6, 8, 10, { value: totalMenu, label: "All" }]}
           pagination
+          loading={loading}
           paginationMode="server"
           rowCount={totalMenu ? totalMenu : 5}
           onPaginationModelChange={setPagination}

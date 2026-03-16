@@ -45,7 +45,7 @@ const registerUser = async (req, res) => {
       gender,
     } = req.body;
 
-    const user = await userService.getUserByEmail(res, email);
+    const user = await userService.getUserByEmailOrMobileNo(res, email,phone);
 
     if (user.length > 0)
       return sendResponse({
@@ -175,7 +175,7 @@ const loginUser = async (req, res) => {
       res,
       statusCode: StatusCodes.OK,
       message: "user logged in sucessfully",
-      data: { updatedUser, accessToken, role: roleIs[0].name },
+      data: { updatedUser, accessToken },
     });
   } catch (error) {
     return sendResponse({
@@ -214,7 +214,7 @@ const logoutUser = async (req, res) => {
     return sendResponse({
       res,
       statusCode: StatusCodes.OK,
-      message: "user profile deleted successfully",
+      message: "user profile logout successfully",
       data: true,
     });
   } catch (error) {

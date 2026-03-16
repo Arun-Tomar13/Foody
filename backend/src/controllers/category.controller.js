@@ -13,11 +13,14 @@ const sendResponse = require("../utils/response");
 const db = require("../config/db.config");
 const fs = require("fs");
 const csv = require("csv-parser");
+const { log } = require("console");
 
 // Add Category
 const addCategory = async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const { name, description,isAvailable } = req.body;
+    console.log(isAvailable,'a');
+    
     const { restaurant_id } = req.query;
     let hasRestraurant;
     if (restaurant_id)
@@ -58,6 +61,7 @@ const addCategory = async (req, res) => {
       name,
       description,
       restaurant_id: hasRestraurant[0].id,
+      isAvailable
     });
 
     if (add.length == 0)

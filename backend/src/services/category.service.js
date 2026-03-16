@@ -3,11 +3,10 @@ const db = require("../config/db.config");
 const sendResponse = require("../utils/response");
 const { StatusCodes } = require("http-status-codes");
 
-const createCategory = async (res,{name,description,restaurant_id}) => {
-    console.log('a',name,description,restaurant_id);
+const createCategory = async (res,{name,description,restaurant_id,isAvailable}) => {
     
   try {
-    const result = await db(tableConstant.category).insert({name,description,restaurant_id});
+    const result = await db(tableConstant.category).insert({name,description,isAvailable,restaurant_id});
     return result;
   } catch (error) {
     return sendResponse({

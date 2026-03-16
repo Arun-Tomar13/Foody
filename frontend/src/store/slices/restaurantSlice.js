@@ -11,6 +11,7 @@ import {
   toggleAvailabilty,
   updateRestaurantApi,
 } from "../../lib/api/restaurantApi";
+import { toast } from "react-toastify";
 
 const initialState = {
   restaurant: null,
@@ -199,6 +200,7 @@ const restaurantSlice = createSlice({
         state.loading = false;
 
         if (action.payload.success) {
+          toast.success(action.payload.message);
           state.restaurantList.push(action.payload.data[0]);
           state.restaurant = action.payload.data[0];
         } else {
@@ -216,6 +218,7 @@ const restaurantSlice = createSlice({
         state.loading = false;
 
         if (action.payload.success) {
+          toast.success(action.payload.message);
           state.restaurantList = state.restaurantList.filter(
             (r) => r.id != action.payload.data,
           );
@@ -234,6 +237,7 @@ const restaurantSlice = createSlice({
         state.loading = false;
 
         if (action.payload.success) {
+          toast.success(action.payload.message);
           state.restaurant = action.payload.data;
         } else {
           state.error = action.payload;
@@ -314,6 +318,7 @@ const restaurantSlice = createSlice({
         state.loading = false;
 
         if (action.payload.success) {
+          toast.success(state.restaurant.isOpen ? 'restaurant is closed' : 'restaurant is now open');
           state.restaurant.isOpen = !state.restaurant.isOpen;
           state.restaurantList = state.restaurantList.map((restaurant) => {
             return restaurant.id == action.payload.data

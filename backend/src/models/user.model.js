@@ -10,9 +10,9 @@ async function createTable() {
     table.integer("age",120).notNullable();
     table.integer('role_id').unsigned().notNullable().references('id').inTable('roles').onDelete('CASCADE');
     table.string("email", 25).notNullable().unique();
-    table.string("phone", 10).notNullable();
+    table.string("phone", 10).notNullable().unique();
     table.string("address").notNullable();
-    table.string("user_image").nullable();
+    table.string("user_image").defaultTo('public\\uploads\\user\\default_user.jpg');
     table.string("password").notNullable();
     table.string("refresh_token");
     table.string("country", 25).notNullable();
