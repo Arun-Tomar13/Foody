@@ -11,10 +11,11 @@ import { useDispatch } from "react-redux";
 const AddCategoryForm = ({ data, fn, close, restaurant_id = null }) => {
   const schema = yup
     .object({
-      name: yup.string().required("Name is required"),
+      name: yup.string().typeError("Name is required").required("Name is required"),
       description: yup
         .string("description must be in string")
-        .required("description a req"),
+        .typeError("description is required")
+        .required("description a required"),
     })
     .required();
 

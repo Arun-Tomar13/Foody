@@ -50,7 +50,7 @@ const OrderItems = () => {
       renderCell: (params) => (
         <div>
           <img
-            src={`http://localhost:8000/${params.row.image}`}
+            src={`http://192.168.1.156:8000/${params.row.image}`}
             className="img-fluid "
             alt="food Img"
           />
@@ -125,7 +125,7 @@ const OrderItems = () => {
                   disableColumnMenu
                   disableColumnResize
                 />
-                <div className='d-flex justify-content-between' ><h4>total items{numberOfItems}</h4> <h3>total ${total}</h3></div>
+                <div className='d-flex justify-content-between' ><h4>total items {numberOfItems}</h4> <h3>total ${total}</h3></div>
                 </div>
                 </div>}
 

@@ -75,7 +75,7 @@ const CustomerPage = () => {
                         <CardMedia
                           component="img"
                           height="140"
-                          image={`http://localhost:8000/${item.image}`}
+                          image={`http://192.168.1.156:8000/${item.image}`}
                           alt={`${item.name} image`}
                         />
                         <CardContent>
@@ -97,7 +97,7 @@ const CustomerPage = () => {
                         </CardContent>
                         <Typography>
                           <span className="bg-warning bg-opacity-75 px-4 py-2 rounded-5">
-                            price : ${item.price}
+                            price : ₹{item.price}
                           </span>
                         </Typography>
                       </CardActionArea>
@@ -143,12 +143,12 @@ const CustomerPage = () => {
             </Grid>
           )}
           {/* Error Text */}
-          {(successMessage || error) && (
+          {( error) && (
             <CustomSnackbar
-              type={error ? "error" : "success"}
+              type={"error" }
               variant="filled"
               open={open}
-              message={error ? error.message : successMessage}
+              message={error.message}
             />
           )}
         </Grid>

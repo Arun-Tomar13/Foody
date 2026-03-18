@@ -1,5 +1,5 @@
 import { Link, Navigate, useNavigate } from "react-router";
-import { Avatar, Button, Grid } from "@mui/material";
+import { Avatar, Button, Grid,colors } from "@mui/material";
 import { LogOut, ShoppingCartIcon } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
@@ -59,22 +59,19 @@ const Navbar = () => {
   };
 
   return (
-    <div>
-      <Grid
-        className="d-flex justify-content-between px-5 py-2 bg-dark
-"
-      >
-        <Grid size={{ md: 12 }}>
+      <Grid container justifyContent='space-between' paddingX={3} paddingY={0.5} >
+        <Grid>
           <Link to="/" className="text-white text-decoration-none">
+          <img src="/foody.png" width='45' alt="logo" />
             Foody
           </Link>
         </Grid>
-        <div>
+        <Grid container >
           <Button onClick={() => handleClickOpenProfile(true)}>
             <Avatar
               src={
                 user
-                  ? `http://localhost:8000/${user?.user_image}`
+                  ? `http://192.168.1.156:8000/${user?.user_image}`
                   : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
               }
               alt="user Img"
@@ -103,7 +100,7 @@ const Navbar = () => {
           <Button onClick={handleLogout}>
             <LogOut />
           </Button>
-        </div>
+        </Grid>
         {error && (
           <CustomSnackbar
             type="error"
@@ -113,7 +110,6 @@ const Navbar = () => {
           />
         )}
       </Grid>
-    </div>
   );
 };
 

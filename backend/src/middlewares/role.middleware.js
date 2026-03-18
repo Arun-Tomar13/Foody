@@ -12,6 +12,7 @@ const checkPermission = (module_id, action_id) => {
   return async (req, res, next) => {
     try {
       const role_id = req.role;
+      
       if (!role_id)
         return sendResponse({
           res,

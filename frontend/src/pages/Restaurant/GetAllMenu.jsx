@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -19,7 +19,7 @@ import {
   removeMenu,
   updateMenu,
 } from "../../store/slices/menuSlice";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import AddMenuItemForm from "../../components/AddMenuItemForm";
 import DialogBox from "../../components/InputFields/DialogBox";
 import { getAllCategories } from "../../store/slices/categorySlice";
@@ -60,6 +60,7 @@ const GetAllMenu = () => {
     }
   }, [error]);
 
+  
   const { categoryid, id } = useParams();
   const dispatch = useDispatch();
 
@@ -68,7 +69,6 @@ const GetAllMenu = () => {
       let result;
       if (id) result = await dispatch(getAllCategories({ id }));
       else result = await dispatch(getAllCategories({}));
-      console.log(result);
     };
     getCategories();
   }, []);
@@ -87,8 +87,7 @@ const GetAllMenu = () => {
             searchQuery,
           }),
         );
-        console.log("data", data);
-      }, 200);
+      }, 500);
       return () => clearTimeout(getData);
     } else {
       data = dispatch(
@@ -110,7 +109,7 @@ const GetAllMenu = () => {
       renderCell: (params) => (
         <div>
           <img
-            src={`http://localhost:8000/${params.row.image}`}
+            src={`http://192.168.1.156:8000/${params.row.image}`}
             className="img-fluid "
             alt="food Img"
           />

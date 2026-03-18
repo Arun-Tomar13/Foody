@@ -17,23 +17,27 @@ const schema = yup
   .object({
     name: yup
       .string()
+      .typeError("name is required")
       .required("Name is required")
       .matches(name_regrex, "enter a valid name"),
-    gender: yup.string().required("select a gender"),
-    country: yup.string().required("select a country"),
-    address: yup.string().required("address a country"),
+    gender: yup.string().typeError("gender is required").oneOf(["male", "female", "other"]).required("select a gender"),
+    country: yup.string().typeError("country is required").required("select a country"),
+    address: yup.string().typeError("address is required").required("address a country"),
     email: yup
       .string()
+      .typeError("email is required")
       .required("email is required")
       .matches(email_Regrex, "enter a valid email"),
     age: yup
       .number()
       .positive()
+      .typeError("age is required")
       .integer()
       .required("please enter your age")
       .max(120, "enter a valid age"),
     phone: yup
       .string()
+      .typeError("contact number is required")
       .matches(phone_regrex, "please enter valid contact number")
       .required("please enter your Contact Number")
       .length(10),
@@ -113,7 +117,7 @@ const ProfilePage = ({ close }) => {
               <img
                 src={
                   user?.user_image
-                    ? `http://localhost:8000/${user?.user_image}`
+                    ? `http://192.168.1.156:8000/${user?.user_image}`
                     : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
                 }
                 alt="user Img"

@@ -350,6 +350,8 @@ const getAllRestaurant = async (req, res) => {
 const getMenuCountPerRestaurant = async (req, res) => {
   try {
     const Data = await restaurantService.MenuPerRestaurant();
+    console.log(Data);
+    
 
     if (Data.length == 0)
       return sendResponse({

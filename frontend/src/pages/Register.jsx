@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addUser } from "../store/slices/userSlice";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import {  Button, CircularProgress, Grid, Snackbar } from "@mui/material";
+import { Button, CircularProgress, Grid, Snackbar } from "@mui/material";
 import SelectInput from "../components/InputFields/SelectInput";
 import { useNavigate } from "react-router";
 import { Link } from "react-router";
@@ -29,6 +29,7 @@ const schema = yup
   .object({
     name: yup
       .string()
+      .typeError("Name is required")
       .required("Name is required")
       .matches(name_regrex, "enter a valid name"),
     gender: yup.string().required("select a gender"),
@@ -36,25 +37,29 @@ const schema = yup
     country: yup.string().required("select a country"),
     email: yup
       .string()
+      .typeError("email is required")
       .required("email is required")
       .matches(email_Regrex, "enter a valid email"),
     password: yup
       .string()
+      .typeError("password must be number")
       .min(6, "Password must be at least 6 characters")
       .required("Password is required"),
     age: yup
-      .number()
-      .positive()
-      .integer()
+      .number("age must be number")
+      .typeError("age is required")
+      .positive("age must be number")
+      .integer("age must be number")
       .required("please enter your age")
       .max(120, "enter a valid age"),
     phone: yup
       .string()
+      .typeError("Contact Number must be number")
       .matches(phone_regrex, "please enter valid contact number")
       .required("please enter your Contact Number")
       .length(10),
   })
-  .required();
+  .required("value is requied");
 
 const Register = () => {
   const [roles, setRoles] = useState([]);
@@ -62,7 +67,7 @@ const Register = () => {
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     if (error) {
       setOpen(true);
@@ -78,6 +83,7 @@ const Register = () => {
     control,
     formState: { errors },
   } = useForm({ resolver: yupResolver(schema) });
+  console.log(errors);
 
   // get roles
   useEffect(() => {
@@ -207,19 +213,19 @@ const Register = () => {
 
             {/* Submit button */}
             <Grid size={{ md: 12, sm: 12, xs: 12 }}>
-              {!loading ? (
-                <CustomButton
+              {/* {!loading ? ( */}
+              <CustomButton
                 // control={control}
                 name="Register"
                 color="sucess"
                 variant="contained"
               />
-              ) : (
-                <Button size="small" color="primary" variant="contained" >
-                  <CircularProgress color="white" size="25px" />
-                  <div className="px-2 py-1" >Registering user</div>
-                </Button>
-              )}
+
+              {/* //   <Button size="small" color="primary" variant="contained" >
+              //     <CircularProgress color="white" size="25px" />
+              //     <div className="px-2 py-1" >Registering user</div>
+              //   </Button> */}
+
               {/* <Button type="submit" >Submit</Button> */}
             </Grid>
           </Grid>
@@ -235,7 +241,12 @@ const Register = () => {
       </Grid>
 
       {error && (
-        <CustomSnackbar type='error' variant="outlined" open={open} message={error.message} />
+        <CustomSnackbar
+          type="error"
+          variant="outlined"
+          open={open}
+          message={error.message}
+        />
       )}
     </Grid>
   );

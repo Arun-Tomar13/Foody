@@ -15,13 +15,6 @@ const Order = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      const orders = await dispatch(getAllOrder());
-    };
-    fetchOrders();
-  }, []);
-
   const { orderList, total, numberOfItems, downloadLink,error } = useSelector(
     (state) => state.order,
   );
@@ -134,8 +127,8 @@ const Order = () => {
               disableColumnResize
             />
             <div className="d-flex justify-content-between">
-              <h4>total orders : {numberOfItems}</h4>{" "}
-              <h3>total spend : ${total}</h3>
+              <h4>total orders : {numberOfItems}</h4>
+              <h3>total spend : ₹{total}</h3>
             </div>
           </div>
         </div>

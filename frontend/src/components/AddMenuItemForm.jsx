@@ -14,19 +14,20 @@ import ShowError from "./ShowError";
 import {  useParams } from "react-router"
 
 const AddMenuItemForm = ({forAdd, data, fn, close }) => {
-console.log(data);
 
   const schema = yup
     .object({
-      name: yup.string().required("Name is required"),
+      name: yup.string().typeError("name is required").required("Name is required"),
       // image: yup.string().required("image is required"),
       type: yup
         .string()
+        .typeError("type is required")
         .oneOf(["veg", "non-veg"])
         .required("select a type of food item"),
-      price: yup.string().required("price a required"),
+      price: yup.string().typeError("price is required").required("price a required"),
       description: yup
         .string("description must be in string")
+        .typeError("description is required")
         .required("description a country"),
     })
     .required();
@@ -53,8 +54,6 @@ console.log(errors);
 
   const onSubmit = async (data) => {
     console.log(data);
-    
-    
     const formData = new FormData()
     if(file) formData.append("image",file)
 
@@ -91,7 +90,7 @@ console.log(errors);
 
             {!forAdd && !updateImage &&  (
               <img
-                src={ `http://localhost:8000/${data?.image}`}
+                src={ `http://192.168.1.156:8000/${data?.image}`}
                 alt="user Img"
                 width="100px"
               />

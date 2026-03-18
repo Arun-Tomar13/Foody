@@ -14,7 +14,7 @@ const db = require("../config/db.config");
 const dbConfig = require("../config/db.config");
 const fs = require("fs");
 const csv = require("csv-parser");
-const { type } = require("os");
+const categoryService = require("../services/category.service");
 
 // Add category
 const addItemToMenu = async (req, res) => {
@@ -27,14 +27,24 @@ const addItemToMenu = async (req, res) => {
       const userid = req.user;
       hasRestraurant = await restaurantService.getRestaurantbyOwnerId(res,userid)
     }
-
+    
     if (hasRestraurant.length == 0)
       return sendResponse({
-        res,
-        statusCode: StatusCodes.BAD_REQUEST,
-        message: responseMessage.hadNotRestaurant,
-        success: false,
-      });
+    res,
+    statusCode: StatusCodes.BAD_REQUEST,
+    message: responseMessage.hadNotRestaurant,
+    success: false,
+  });
+  
+  const hasCategory = await categoryService.getCategory(res,{id:category_id,restaurant_id:hasRestraurant[0].id})
+
+  if (hasCategory.length == 0)
+    return sendResponse({
+  res,
+  statusCode: StatusCodes.BAD_REQUEST,
+  message: 'this category does not exists in your restaurant',
+  success: false,
+});
       
       const isItemExists = await menuService.getMenuItemByName(res,name,hasRestraurant[0].id)
       if (isItemExists.length > 0)
@@ -548,20 +558,6 @@ const getMenuItem = async (req, res) => {
     const role = req.role;
     const userid = req.user;
 
-    if (data.category_id) {
-      const hasCategory = await db(tableConstant.category).where({
-        id: data.category_id,
-      });
-
-      if (hasCategory.length == 0)
-        return sendResponse({
-          res,
-          statusCode: StatusCodes.BAD_REQUEST,
-          message: "category does not exists",
-          success: false,
-        });
-    }
-
     if (data.restaurant_id || rolesConstant.restaurant_owner == role ) {
       if( rolesConstant.restaurant_owner == role) {
         const restaurant = await restaurantService.getRestaurantbyOwnerId(res,userid);
@@ -578,6 +574,18 @@ const getMenuItem = async (req, res) => {
           res,
           statusCode: StatusCodes.BAD_REQUEST,
           message: responseMessage.hadNotRestaurant,
+          success: false,
+        });
+    }
+
+    if (data.category_id) {
+      const hasCategory = await categoryService.getCategory(res,{id:data.category_id,restaurant_id:data.restaurant_id})
+
+      if (hasCategory.length == 0)
+        return sendResponse({
+          res,
+          statusCode: StatusCodes.BAD_REQUEST,
+          message: "category does not exists for this restaurant",
           success: false,
         });
     }

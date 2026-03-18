@@ -39,7 +39,7 @@ const topUpInTrasaction = async (req, res) => {
     return sendResponse({
       res,
       statusCode: StatusCodes.OK,
-      message: `topup of $${amount} is successfully`,
+      message: `topup of ₹${amount} is successfully`,
       data: transaction,
     });
   } catch (error) {

@@ -51,7 +51,7 @@ const registerUser = async (req, res) => {
       return sendResponse({
         res,
         statusCode: StatusCodes.BAD_REQUEST,
-        message: "user already exists",
+        message: "user already exists with email/phone number",
         success: false,
       });
 

@@ -13,18 +13,27 @@ import CustomSnackbar from "../components/CustomSnackbar";
 
 const schema = yup
   .object({
-    Email: yup.string().required("email is required"),
+    Email: yup
+      .string()
+      .typeError("email is required")
+      .required("email is required"),
     Password: yup
       .string()
+      .typeError("Password is required")
       .min(6, "Password must be at least 6 characters")
       .required("Password is required"),
   })
   .required();
 
 const Login = () => {
-  const { error, loading } = useSelector((state) => state.users);
+  const {user, error, loading } = useSelector((state) => state.users);
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(()=>{
+    if(user) navigate('/')
+  },[user])
 
   useEffect(() => {
     if (error) {
@@ -35,7 +44,6 @@ const Login = () => {
     }
   }, [error]);
 
-  const navigate = useNavigate();
   const {
     handleSubmit,
     control,
@@ -53,9 +61,13 @@ const Login = () => {
 
   return (
     // Main container
-    <Grid container padding={2} spacing={2} >
+    <Grid container padding={2} spacing={2}>
       {/* Left Side */}
-      <Grid size={{ md: 4, sm: 12 }} padding={3} className="d-flex align-items-center">
+      <Grid
+        size={{ md: 4, sm: 12 }}
+        padding={3}
+        className="d-flex align-items-center"
+      >
         {/* Form */}
         <AFormProvider onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={2}>
@@ -88,14 +100,13 @@ const Login = () => {
 
             {/* Login Button */}
             <Grid size={{ md: 12, sm: 12, xs: 12 }}>
-              {!loading ? (
-                <CustomButton name="Login" variant="contained"></CustomButton>
-              ) : (
-                <Button size="small" color="primary" variant="contained">
+              {/* {!loading ? ( */}
+              <CustomButton name="Login" variant="contained"></CustomButton>
+
+              {/* <Button size="small" color="primary" variant="contained">
                   <CircularProgress color="white" size="25px" />
                   <div className="px-2 py-1">Logging in</div>
-                </Button>
-              )}
+                </Button> */}
             </Grid>
             {/* Error Text */}
             {error && (
@@ -112,7 +123,7 @@ const Login = () => {
 
       {/* Right Side  */}
       <Grid size={{ md: 8, sm: 12 }}>
-        <video width='60%' src="/home.mp4" autoPlay loop />
+        <video width="60%" src="/home.mp4" autoPlay loop />
       </Grid>
     </Grid>
   );

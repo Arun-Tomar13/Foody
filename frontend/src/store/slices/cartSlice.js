@@ -5,6 +5,7 @@ import {
   decreaseItemInCart,
   deleteAllItemInCart,
 } from "../../lib/api/cartApi";
+import { toast } from "react-toastify";
 
 export const addCartItem = createAsyncThunk(
   "cart/create",
@@ -91,7 +92,7 @@ const cartSlice = createSlice({
       })
       .addCase(addCartItem.fulfilled, (state, action) => {
         if (action.payload.success) {
-          state.successMessage=action.payload.message
+          toast.success(action.payload.message)
           if (action.payload.data.updated) {
             state.itemList = state.itemList.map((item) => {
               if (item.id == action.payload.data.newCartItem[0].id) {

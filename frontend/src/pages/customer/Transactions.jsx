@@ -97,10 +97,10 @@ console.log(successMessage);
           <div className="d-flex justify-content-between">
           <Grid container direction='column' spacing={1} >
             <Grid container >
-              <h2 >Balance: ${balance}</h2>
+              <h2 >Balance: ₹{balance}</h2>
             </Grid>
             <Grid container spacing={5} >
-              <h4>Credit: ${credit}</h4> <h4>Debit: ${debit} </h4>
+              <h4>Credit: ₹{credit}</h4> <h4>Debit: ₹{debit} </h4>
             </Grid>
           </Grid>
             <Grid>

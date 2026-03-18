@@ -18,6 +18,7 @@ import { USER_ROLES } from "./constant";
 import { useEffect } from "react";
 import { getProfile } from "./store/slices/userSlice";
 import ProtectedRoute from "./pages/ProtectedRoute";
+import PageNotFound from "./components/PageNotFound";
 
 function App() {
   const dispatch = useDispatch()
@@ -26,20 +27,21 @@ function App() {
   // error
   useEffect(() => {
      dispatch(getProfile());
-    if(localStorage.getItem('Bearer')?.trim()=='') navigate("/login");
+     
+    if(localStorage.getItem('Bearer')?.trim()=='' || !localStorage.getItem('Bearer')) navigate("/login");
   }, []);
 
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
+      <Route index path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/" element={<Layout />}>
-        <Route path="" element={<Home />} />
+        <Route index element={<Home />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route
           path="restaurant"
           element={
-            <ProtectedRoute allowedRoles={[USER_ROLES.restaurent_owner,USER_ROLES.admin]}>
+            <ProtectedRoute allowedRoles={[USER_ROLES.admin]}>
               <RestaurantDashboard />
             </ProtectedRoute>
           }
@@ -55,7 +57,7 @@ function App() {
         <Route
           path="restaurant/:id/category/:categoryid"
           element={
-            <ProtectedRoute allowedRoles={[USER_ROLES.restaurent_owner,USER_ROLES.admin]}>
+            <ProtectedRoute allowedRoles={[USER_ROLES.admin]}>
               <CategoryPage />
             </ProtectedRoute>
           }
@@ -100,9 +102,9 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="*" element={<Unauthorized />} />
       </Route>
-        <Route path="unauthorized" element={<Unauthorized />} />
+        <Route path="*" element={<PageNotFound />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
     </Routes>
   );
 }

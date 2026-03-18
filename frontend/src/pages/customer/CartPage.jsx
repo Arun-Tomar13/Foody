@@ -70,7 +70,7 @@ const CartPage = ({ close }) => {
       renderCell: (params) => (
         <div>
           <img
-            src={`http://localhost:8000/${params.row.image}`}
+            src={`http://192.168.1.156:8000/${params.row.image}`}
             className="img-fluid "
             alt="food Img"
           />
@@ -278,7 +278,7 @@ const CartPage = ({ close }) => {
                           navigate("/transactions");
                         }}
                       >
-                        Top Up ${total-balance}
+                        Top Up ₹{total-balance}
                       </Button>
                       to order
                     </p>

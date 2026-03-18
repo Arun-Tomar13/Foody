@@ -23,14 +23,18 @@ import CreateRestaurantPage from "./CreateRestaurantPage";
 const RestroOwner = () => {
   const schema = yup
     .object({
-      name: yup.string().required("Name is required"),
+      name: yup
+      .string()
+      .typeError("name is required")
+      .required("Name is required"),
       type: yup
         .string()
+        .typeError("type is required")
         .oneOf(["veg", "non-veg", "both"])
         .required("select a type of hotel"),
-      address: yup.string().required("address a country"),
-      openingTime: yup.string().required("openingTime a country"),
-      closingTime: yup.string().required("closingTime a country"),
+      address: yup.string().typeError("address is required").required("address is required"),
+      openingTime: yup.string().typeError("opening time is required").required("opening time is required"),
+      closingTime: yup.string().typeError("closing time is required").required("closingTime is required"),
     })
     .required();
 
@@ -41,6 +45,7 @@ const RestroOwner = () => {
   const [showCategory, setShowCategory] = useState(false);
 
   const { restaurant,loading } = useSelector((state) => state?.restaurant);
+  const hasRestro = useSelector((state) => state?.restaurant?.hasRestro);
 
   const {
     control,
@@ -87,13 +92,9 @@ const RestroOwner = () => {
     setReadOnly((prev) => !prev);
   };
 
-  if(loading) return <Grid container size={12} height={700} justifyContent='center' alignItems='center' >
-    <CircularProgress/>
-  </Grid>
-
   return (
     <div>
-      {restaurant ? (
+      {hasRestro ? (
         <Grid container direction="column" spacing={3} alignItems="center">
           <Grid border={2} padding={1} borderRadius={5}  container justifyContent='center' alignItems='center' color={restaurant.isOpen ? "green" : "red"} >
              {restaurant.isOpen ? <span className="border py-1 px-2 rounded-pill border-success" >ON</span> : '' } 
@@ -142,7 +143,7 @@ const RestroOwner = () => {
                   <TextInput
                     control={control}
                     name="openingTime"
-                    type="text"
+                    type="time"
                     error={errors}
                   />
                 </Grid>
@@ -152,7 +153,7 @@ const RestroOwner = () => {
                   <TextInput
                     control={control}
                     name="closingTime"
-                    type="text"
+                    type="time"
                     error={errors}
                   />
                 </Grid>

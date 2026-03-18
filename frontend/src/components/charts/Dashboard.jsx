@@ -70,8 +70,8 @@ const Dashboard = () => {
   
 
   return (
-    <Grid container size={12}>
-      <Grid size={{ md: 6, sm: 12 }}>
+    <Grid container spacing={3} size={12}>
+      <Grid size={{ md: 6, sm: 12 }} boxShadow={5} >
         <CutsomCharts
           type="pie"
           name="total"
@@ -85,7 +85,7 @@ const Dashboard = () => {
           ]},]}
         />
       </Grid>
-      <Grid size={{ md: 6, sm: 12 }}>
+      <Grid size={{ md: 6, sm: 12 }} boxShadow={5}>
         <CutsomCharts
           title="Menu per Restaurant"
           subtitle="total Menu"
@@ -97,20 +97,19 @@ const Dashboard = () => {
           data={[{ name:'menu', data:menudata},]}
         />
       </Grid>
-      <Grid size={{ md: 6, sm: 12 }}>
+      <Grid size={{ md: 6, sm: 12 }} boxShadow={5}>
         <CutsomCharts
           title="order per Restaurant"
           subtitle="total Order"
           name="orders"
           type="line"
           total={totalOrders}
-          xData={yAxisRestaurant}
           yName="Number of orders"
           xName="restaurant"
           data={[{ name:'orders', data:orderdata},]}
         />  
       </Grid>
-      <Grid size={{ md: 6, sm: 12 }}>
+      <Grid size={{ md: 6, sm: 12 }} boxShadow={5}>
         <CutsomCharts
           title="revenue per Restaurant"
           name="orders"
@@ -121,9 +120,9 @@ const Dashboard = () => {
           data={[{ name:'revenue', data:revenuedata},]}
         />  
       </Grid>
-      {revenuePerday && <Grid size={{ md: 6, sm: 12 }}>
+      {revenuePerday && <Grid size={{ md: 6, sm: 12 }} boxShadow={5}>
         <CutsomCharts
-          title="order per Restaurant"
+          title="order by Restaurant per day"
           name="revenue"
           type="line"
           xData={dates}

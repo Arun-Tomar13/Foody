@@ -7,6 +7,7 @@ import { useCallback } from "react";
 import { CloudUpload, DeleteIcon } from "lucide-react";
 import { FILE_SIZE } from "../constant";
 import { useParams } from "react-router";
+import { toast } from "react-toastify";
 
 const AddCategoryInBulk = ({ close }) => {
   const [file, setFile] = useState(null);
@@ -15,17 +16,19 @@ const AddCategoryInBulk = ({ close }) => {
 
   const onDrop = useCallback((acceptedFiles) => {
     console.log("Accepted Files", acceptedFiles);
-    if(acceptedFiles.size >= FILE_SIZE) {
-      "File size exceeded"
-    }
-    if(acceptedFiles.includes("")) {
-
-    }
-    else {
-      "Invalid File"
-    }
-    setFile(acceptedFiles[0]);
-    console.log(acceptedFiles[0]);
+    if (acceptedFiles.size >= FILE_SIZE) {
+          toast.warning("File size exceeded it must be between 12kb");
+        } else {
+          if (acceptedFiles[0].type != "text/csv") {
+            toast.warning("File must be csv");
+          } else {
+            if (acceptedFiles.length > 1) {
+              toast.warning("only one file allowed");
+            } else {
+               setFile(acceptedFiles[0]);
+            }
+          }
+        }
   }, []);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 

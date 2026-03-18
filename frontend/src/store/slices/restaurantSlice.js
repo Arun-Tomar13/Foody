@@ -18,6 +18,7 @@ const initialState = {
   restaurantList: [],
   error: null,
   loading: null,
+  hasRestro:null
 };
 
 export const addRestaurant = createAsyncThunk(
@@ -254,7 +255,9 @@ const restaurantSlice = createSlice({
         state.loading = false;
 
         if (action.payload.success) {
+          
           state.restaurant = action.payload.data;
+          state.hasRestro = action.payload.data ? true : false
         } else {
           state.error = action.payload;
         }

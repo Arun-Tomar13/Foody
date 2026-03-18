@@ -19,7 +19,6 @@ const { log } = require("console");
 const addCategory = async (req, res) => {
   try {
     const { name, description,isAvailable } = req.body;
-    console.log(isAvailable,'a');
     
     const { restaurant_id } = req.query;
     let hasRestraurant;
@@ -98,7 +97,6 @@ const addCategoryInBulk = async (req, res) => {
     let restaurant_id;
     if (rolesConstant.restaurant_owner == role) {
       const userid = req.user;
-      console.log("in owner");
 
       const hasRestraurant = await restaurantService.getRestaurantbyOwnerId(
         res,
@@ -115,7 +113,6 @@ const addCategoryInBulk = async (req, res) => {
 
       restaurant_id = hasRestraurant[0].id;
     } else {
-      console.log("in admin");
 
       restaurant_id = req.query?.restaurant_id || null;
       if (restaurant_id) {
@@ -168,7 +165,6 @@ const addCategoryInBulk = async (req, res) => {
       if (count == 2) {
         for (let i in categoryBulkCSVFormateHeader) {
           if (rolesConstant.admin != role && i == 2) break;
-
           if (
             categoryBulkCSVFormateHeader[i] == undefined ||
             categoryBulkCSVFormateHeader[i] != Object.keys(row)[i]?.trim()
@@ -232,6 +228,7 @@ const addCategoryInBulk = async (req, res) => {
     }
 
     for (let i in inputData) {
+      
       //getting restaurant
       let error = "",
         restaurantName = inputData[i].restaurant || null;
@@ -262,6 +259,7 @@ const addCategoryInBulk = async (req, res) => {
 
       //getting category
       if (!error) {
+        
         if (!categoryCache[inputData[i].restaurant]) {
           let categoryData = await db(tableConstant.category)
             .where({ restaurant_id: inputData[i].restaurant })
@@ -270,20 +268,22 @@ const addCategoryInBulk = async (req, res) => {
           for (let data of categoryData) {
             categoriesFromDB.push(data.name.toLowerCase());
           }
-
+          
           if (categoriesFromDB.includes(inputData[i].name)) {
             error += `category ${inputData[i].name} already exists${rolesConstant.admin != role ? "" : ` in ${restaurantName}`} at row ${count}, `;
           }
           categoryCache[inputData[i].restaurant] = categoriesFromDB;
+          
           categoriesFromDB = [];
         }
-      } else {
+       else {
+        
         if (
           categoryCache[inputData[i].restaurant].includes(inputData[i].name)
         ) {
           error += `category ${inputData[i].name} already exists${rolesConstant.admin != role ? "" : ` in ${restaurantName}`} at row ${count}, `;
         }
-      }
+      }}
 
       if (error) errors.push(error);
 

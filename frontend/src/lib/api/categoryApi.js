@@ -27,8 +27,6 @@ const updateCategoryApi = async (data)=>{
 }
 
 const getAllCategoriesByRestroIdApi = async (data)=>{
-    console.log("dd",data);
-    
     const result = await axiosInstance.get(`/category/restaurant${data.id ? `?id=${data.id}` : ''}`)
     return result
 }
