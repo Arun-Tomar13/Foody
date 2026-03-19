@@ -10,6 +10,7 @@ const moduleRoute = require('./module.route.js');
 const actionRoute = require('./action.route..js');
 const orderRoute = require('./order.routes.js');
 const addressRoute = require('./address.routes.js');
+const offerRoute = require('./offer.routes.js');
 const transactionRoute = require('./transaction.routes.js');
 const { auth } = require("../middlewares/auth.middleware.js");
 const getRoles = require('../controllers/role.controller.js');
@@ -29,5 +30,6 @@ router.use('/address',auth(),addressRoute)
 router.use('/transaction',auth(),transactionRoute)
 router.use('/module',auth(),moduleRoute)
 router.use('/action',auth(),actionRoute)
+router.use('/offer',auth(),offerRoute)
 
 module.exports= router

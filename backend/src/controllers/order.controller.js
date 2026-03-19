@@ -4,6 +4,7 @@ const sendResponse = require("../utils/response");
 const cartItemService = require("../services/cartItem.service");
 const userService = require("../services/user.service");
 const menuService = require("../services/menu.service");
+const offerService = require("../services/offer.services");
 const transactionService = require("../services/transaction.service");
 let converter = require("json-2-csv");
 const { writeFileSync } = require("fs");
@@ -16,7 +17,7 @@ const createOrder = async (req, res) => {
   try {
     const cart_id = req.cart;
     const userId = req.user;
-    const { address } = req.body;
+    const { address,coupon_code } = req.body;
 
     if (!cart_id)
       return sendResponse({
@@ -26,7 +27,29 @@ const createOrder = async (req, res) => {
         success: false,
       });
 
+      const offer = await offerService.getOffer(res,{coupon_code})
+  
+            if (offer.length == 0) {
+              return sendResponse({
+                res,
+                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+                message: "offer does not exists",
+                success: false,
+              });
+            }
+
     const cartItems = await cartItemService.getAllCartItem(res, cart_id);
+
+      if (cartItems.length == 0) {
+        return sendResponse({
+          res,
+          statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+          message: "empty cart",
+          success: false,
+        });
+      }
+
+      
 
     const total = cartItems.reduce((sum, item) => {
       return sum + item.price * item.quantity;
@@ -143,7 +166,7 @@ const getOrderItemsByOrderId = async (req, res) => {
       return sendResponse({
         res,
         statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-        message: "order does have items",
+        message: "order does not exists",
         success: false,
       });
     }

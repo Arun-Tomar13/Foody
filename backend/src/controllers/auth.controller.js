@@ -13,10 +13,12 @@ const generateTokens = (userId, role_id, cart_id) => {
     const accessToken = jwt.sign(
       { userId, role_id, cart_id },
       process.env.ACCESS_TOKEN_SECRET,
+      {expiresIn:process.env.ACCESS_TOKEN_EXPIRY}
     );
     const refreshToken = jwt.sign(
       { userId, role_id, cart_id },
       process.env.REFRESH_TOKEN_SECRET,
+      {expiresIn:process.env.REFRESH_TOKEN_EXPIRY}
     );
 
     return { accessToken, refreshToken };

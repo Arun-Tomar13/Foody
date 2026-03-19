@@ -14,6 +14,7 @@ const tableConstant={
     module:"modules",
     permission:"permissions",
     action:"actions",
+    offer:'offers'
 }
 
 const responseMessage = {

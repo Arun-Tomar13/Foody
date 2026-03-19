@@ -63,7 +63,7 @@ const schema = yup
 
 const Register = () => {
   const [roles, setRoles] = useState([]);
-  const { error, loading } = useSelector((state) => state.users);
+  const {user, error, loading } = useSelector((state) => state.users);
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -76,6 +76,10 @@ const Register = () => {
       }, 2000);
     }
   }, [error]);
+
+  useEffect(() => {
+    if (user) navigate("/");
+  }, [user]);
 
   // resct form hook
   const {

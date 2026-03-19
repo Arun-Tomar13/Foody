@@ -102,7 +102,7 @@ const OrderItems = () => {
          { successful 
          ?  
          <div className='d-flex flex-column align-items-center' >
-          <video width='310px' src="../public/Successful.mp4" autoPlay loop  />
+          <video width='310px' src="/Successful.mp4" autoPlay loop  />
           <h2 className='text-success' >Congratulations your order placed successfully 🎉</h2>
          </div>
 
@@ -125,7 +125,7 @@ const OrderItems = () => {
                   disableColumnMenu
                   disableColumnResize
                 />
-                <div className='d-flex justify-content-between' ><h4>total items {numberOfItems}</h4> <h3>total ${total}</h3></div>
+                <div className='d-flex justify-content-between' ><h4>total items {numberOfItems}</h4> <h3>total ₹{total}</h3></div>
                 </div>
                 </div>}
 

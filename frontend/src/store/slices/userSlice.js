@@ -110,9 +110,11 @@ const UserSlice = createSlice({
       })
       .addCase(logoutUser.fulfilled, (state, action) => {
         state.loading = false;
-        action.payload.success
-          ? toast.success(action.payload.message)
-          : (state.error = action.payload);
+        if(action.payload.success){
+          state.user=null
+           toast.success(action.payload.message)
+        }
+        else state.error = action.payload;
       })
       .addCase(logoutUser.rejected, (state) => {
         state.loading = false;

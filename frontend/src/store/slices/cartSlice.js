@@ -92,7 +92,7 @@ const cartSlice = createSlice({
       })
       .addCase(addCartItem.fulfilled, (state, action) => {
         if (action.payload.success) {
-          toast.success(action.payload.message)
+          toast.success(action.payload.message,{position:'bottom-left'})
           if (action.payload.data.updated) {
             state.itemList = state.itemList.map((item) => {
               if (item.id == action.payload.data.newCartItem[0].id) {

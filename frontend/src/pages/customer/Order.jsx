@@ -15,6 +15,8 @@ const Order = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
+  useEffect(()=>{dispatch(getAllOrder())},[])
+
   const { orderList, total, numberOfItems, downloadLink,error } = useSelector(
     (state) => state.order,
   );

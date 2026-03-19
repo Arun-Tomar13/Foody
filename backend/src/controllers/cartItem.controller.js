@@ -1,5 +1,5 @@
 const { StatusCodes } = require("http-status-codes");
-const cartItemService = require('../services/cartItem.service')
+const cartItemService = require("../services/cartItem.service");
 const sendResponse = require("../utils/response");
 const menuService = require("../services/menu.service");
 
@@ -7,7 +7,17 @@ const menuService = require("../services/menu.service");
 const addCartItem = async (req, res) => {
   try {
     const cart_id = req.cart;
-    const {item_id} = req.body;
+    const { item_id } = req.body;
+
+    const isItemExists = await menuService.getMenuItemById(res, item_id);
+
+    if (isItemExists.length == 0)
+      return sendResponse({
+        res,
+        statusCode: StatusCodes.BAD_REQUEST,
+        message: "item does not exists",
+        success: false,
+      });
 
     if (!cart_id)
       return sendResponse({
@@ -17,20 +27,39 @@ const addCartItem = async (req, res) => {
         success: false,
       });
 
+    const allCartItems = await cartItemService.getAllCartItem(res, cart_id);
+
+    if (allCartItems.length) {
+      const itemFromCart = await menuService.getMenuItemById(
+        res,
+        allCartItems[0].item_id,
+      );
+
+      if (isItemExists[0].restaurant_id !== itemFromCart[0].restaurant_id) {
+        return sendResponse({
+          res,
+          statusCode: StatusCodes.BAD_REQUEST,
+          message: `item is from other restaurant`,
+          success: false,
+        });
+      }
+    }
+
     const isCartItemExists = await cartItemService.CartItemExists(
       res,
       item_id,
       cart_id,
     );
-    
-    let cartItem = null,updated=0;
+
+    let cartItem = null,
+      updated = 0;
 
     if (isCartItemExists.length > 0) {
       cartItem = await cartItemService.IncrementInCartItem(
         res,
-        isCartItemExists[0].id
+        isCartItemExists[0].id,
       );
-      updated=1;
+      updated = 1;
     } else {
       const menu = await menuService.getMenuItemById(res, item_id);
       if (menu.length == 0) {
@@ -41,17 +70,25 @@ const addCartItem = async (req, res) => {
           success: false,
         });
       }
-      cartItem = await cartItemService.createCartItem(res, item_id,menu[0].price, cart_id);
+      cartItem = await cartItemService.createCartItem(
+        res,
+        item_id,
+        menu[0].price,
+        cart_id,
+      );
     }
 
-    const newCartItem = await cartItemService.getItemByCartId(res,item_id,cart_id)
-console.log(newCartItem);
+    const newCartItem = await cartItemService.getItemByCartId(
+      res,
+      item_id,
+      cart_id,
+    );
 
     return sendResponse({
       res,
       statusCode: StatusCodes.OK,
       message: "item added successfully",
-      data: {newCartItem,updated}
+      data: { newCartItem, updated },
     });
   } catch (error) {
     return sendResponse({
@@ -76,10 +113,7 @@ const getAllCartItem = async (req, res) => {
         success: false,
       });
 
-    const AllCardItem = await cartItemService.getAllCartItem(
-      res,
-      cart_id,
-    );
+    const AllCardItem = await cartItemService.getAllCartItem(res, cart_id);
 
     return sendResponse({
       res,
@@ -109,13 +143,10 @@ const removeAllCartItem = async (req, res) => {
         success: false,
       });
 
-    const AllCardItem = await cartItemService.deleteAllCartItem(
-      res,
-      cart_id,
-    );
+    const AllCardItem = await cartItemService.deleteAllCartItem(res, cart_id);
 
-    if(!AllCardItem) {
-        return sendResponse({
+    if (!AllCardItem) {
+      return sendResponse({
         res,
         statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
         message: "error while deleting cart item",
@@ -141,7 +172,7 @@ const removeAllCartItem = async (req, res) => {
 
 const removeCartItemById = async (req, res) => {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
 
     if (!id)
       return sendResponse({
@@ -150,14 +181,11 @@ const removeCartItemById = async (req, res) => {
         message: "user does not have cart",
         success: false,
       });
-      
-      const {result,del} = await cartItemService.DecrementInCartItem(
-          res,
-          id
-        );
 
-    if(!result) {
-        return sendResponse({
+    const { result, del } = await cartItemService.DecrementInCartItem(res, id);
+
+    if (!result) {
+      return sendResponse({
         res,
         statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
         message: "error while deleting cart item",
@@ -169,7 +197,7 @@ const removeCartItemById = async (req, res) => {
       res,
       statusCode: StatusCodes.OK,
       message: "successfully removed a cart item",
-      data: {id,del},
+      data: { id, del },
     });
   } catch (error) {
     return sendResponse({
@@ -183,7 +211,7 @@ const removeCartItemById = async (req, res) => {
 
 const getCartItemById = async (req, res) => {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
 
     if (!id)
       return sendResponse({
@@ -192,14 +220,11 @@ const getCartItemById = async (req, res) => {
         message: "user does not have cart",
         success: false,
       });
-      
-      const cartItem = await cartItemService.getCartItemById(
-          res,
-          id
-        ); 
 
-    if(cartItem.length==0) {
-        return sendResponse({
+    const cartItem = await cartItemService.getCartItemById(res, id);
+
+    if (cartItem.length == 0) {
+      return sendResponse({
         res,
         statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
         message: "cartItem does not exists",
@@ -223,8 +248,10 @@ const getCartItemById = async (req, res) => {
   }
 };
 
-
-
-
-
-module.exports = {addCartItem,getAllCartItem,removeAllCartItem,removeCartItemById,getCartItemById}
+module.exports = {
+  addCartItem,
+  getAllCartItem,
+  removeAllCartItem,
+  removeCartItemById,
+  getCartItemById,
+};

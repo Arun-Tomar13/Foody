@@ -16,11 +16,15 @@ import {
 import { addCartItem } from "../../store/slices/cartSlice";
 import { CircleDot, LoaderPinwheel } from "lucide-react";
 import CustomSnackbar from "../../components/CustomSnackbar";
+import ChartItemChoice from "./ChartItemChoice";
+import DialogBox from "../../components/InputFields/DialogBox";
 
 const CustomerPage = () => {
   const dispatch = useDispatch();
   const [searchQuery, setSearchQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const [openForCartChoice, setOpenForCartChoice] = useState(false);
+  const [itemId, setItemId] = useState(null);
   const [limit, setLimit] = useState(20);
 
   useEffect(() => {
@@ -33,18 +37,34 @@ const CustomerPage = () => {
   }, [searchQuery]);
 
   const { menuList, error, loading } = useSelector((state) => state.menu);
+  const errorFromCart = useSelector((state) => state.cart?.error);
   const user = useSelector((state) => state.users?.user);
-  const { successMessage } = useSelector((state) => state.cart);
-  console.log(menuList);
 
   useEffect(() => {
-    if (error || successMessage) {
+    if (error || errorFromCart) {
       setOpen(true);
       setTimeout(() => {
         setOpen(false);
       }, 1000);
     }
-  }, [error, successMessage]);
+  }, [error || errorFromCart]);
+
+  const handleAddCartItem = async (id) => {
+    const result = await dispatch(addCartItem(id));
+    if (
+      !result.payload.success &&
+      result.payload.message == "item is from other restaurant"
+    ) {
+      console.log('lala');
+      
+      setOpenForCartChoice(true);
+      setItemId(id);
+    }
+  };
+
+  const handleClose = () => {
+    setOpenForCartChoice(false);
+  };
 
   return (
     <div>
@@ -113,7 +133,7 @@ const CustomerPage = () => {
                               : false
                           }
                           variant="outlined"
-                          onClick={() => dispatch(addCartItem(item.id))}
+                          onClick={() => handleAddCartItem(item.id)}
                         >
                           {!item.isAvailable ||
                           !item.isRestaurantOpen ||
@@ -142,13 +162,22 @@ const CustomerPage = () => {
               <Typography>No result found for {searchQuery}</Typography>
             </Grid>
           )}
+
+          {/* Cart item choice (discard/replace) */}
+          <DialogBox
+            open={openForCartChoice}
+            onClose={handleClose}
+            title={errorFromCart.message}
+            component={<ChartItemChoice id={itemId} close={handleClose} />}
+          />
+
           {/* Error Text */}
-          {( error) && (
+          {(errorFromCart || error) && (
             <CustomSnackbar
-              type={"error" }
+              type={"error"}
               variant="filled"
               open={open}
-              message={error.message}
+              message={error ? error.message : errorFromCart.message}
             />
           )}
         </Grid>
