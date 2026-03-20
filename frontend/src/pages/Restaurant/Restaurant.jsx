@@ -44,8 +44,11 @@ const RestroOwner = () => {
   const params = useParams();
   const [showCategory, setShowCategory] = useState(false);
 
-  const { restaurant,loading } = useSelector((state) => state?.restaurant);
-  const hasRestro = useSelector((state) => state?.restaurant?.hasRestro);
+  const { restaurant,loading,hasRestro } = useSelector((state) => state?.restaurant);
+  const r = useSelector((state) => state?.restaurant);
+
+  console.log(r);
+  
 
   const {
     control,
@@ -76,6 +79,7 @@ const RestroOwner = () => {
   const handleClose = () => {
     setOpen(false);
   };
+console.log(hasRestro);
 
   const onSubmit = async ({
     id,

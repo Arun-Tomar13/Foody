@@ -22,6 +22,12 @@ const getUserProfile = async () => {
   return result;
 };
 
+const getRestaurantOwnerWhoNotHaveRestroApi = async () => {
+  const result = await axiosInstance.get("/user/restaurnt-owner");
+  
+  return result;
+};
+
 const getRoles = async () => {
   const result = await axiosInstanceWithoutAuth.get("/getroles");
   console.log(result);
@@ -36,4 +42,4 @@ const updateUserProfile = async (data) => {
   return result;
 };
 
-export { login, register, getUserProfile, updateUserProfile, getRoles, logout };
+export { login, register, getUserProfile, updateUserProfile, getRoles, logout,getRestaurantOwnerWhoNotHaveRestroApi };

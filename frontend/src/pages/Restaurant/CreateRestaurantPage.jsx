@@ -4,13 +4,27 @@ import * as yup from "yup";
 import TextInput from "../../components/InputFields/TextInput";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Restro_type_Options } from "../../constant";
+import { Restro_type_Options, USER_ROLES } from "../../constant";
 import AutoComplete from "../../components/InputFields/AutoComplete";
 import CustomButton from "../../components/InputFields/CustomButton";
 import { addRestaurant } from "../../store/slices/restaurantSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { getRestaurantOwnerWhoNotHaveRestro } from "../../store/slices/userSlice";
+import SelectInput from "../../components/InputFields/SelectInput";
+import { useState } from "react";
+import { toast } from "react-toastify";
 
 const CreateRestaurantPage = ({close}) => {
+
+    const dispatch = useDispatch()
+     const {restaurant_owner_not_have_restaurant}= useSelector(state=>state.users)
+     const {role}= useSelector(state=>state.users?.user)
+
+  useEffect(()=>{
+    if(role==USER_ROLES.admin) dispatch(getRestaurantOwnerWhoNotHaveRestro())
+    },[])
+
   const schema = yup
     .object({
       name: yup.string().required("Name is required"),
@@ -24,8 +38,6 @@ const CreateRestaurantPage = ({close}) => {
     })
     .required();
 
-    const dispatch = useDispatch()
-
   const {
     control,
     handleSubmit,
@@ -34,18 +46,32 @@ const CreateRestaurantPage = ({close}) => {
 
   const onSubmit = async (data) => {
     // console.log(data);
-
+    if(role==USER_ROLES.admin && data.owner=='') {
+      toast.error('please select owner!!')
+      return
+    }
+    if(!data.owner) data.owner = 0
     const result  = await dispatch(addRestaurant(data))
-    console.log('data',result);
     if(result.payload.success ) close()
     
   };
+
+  
 
   return (
     <Box>
       <FormProvider onSubmit={handleSubmit(onSubmit)}>
         <Grid container direction="column" padding={2} spacing={2}>
           {/* Name field */}
+          { role==USER_ROLES.admin && restaurant_owner_not_have_restaurant.length>0 && <Grid>
+            <SelectInput
+              control={control}
+              name="owner"
+              options={restaurant_owner_not_have_restaurant}
+              error={errors}
+            />
+          </Grid>}
+
           <Grid>
             <TextInput
               control={control}

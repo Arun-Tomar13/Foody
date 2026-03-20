@@ -36,7 +36,7 @@ const auth = () => {
       return sendResponse({
         res,
         statusCode: StatusCodes.UNAUTHORIZED,
-        message: 'invalid token',
+        message: 'invalid toen',
         success: false,
       });
     }

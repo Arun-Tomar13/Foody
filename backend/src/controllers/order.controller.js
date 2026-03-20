@@ -17,7 +17,7 @@ const createOrder = async (req, res) => {
   try {
     const cart_id = req.cart;
     const userId = req.user;
-    const { address,coupon_code } = req.body;
+    const { address,coupon_code } = req.body; 
 
     if (!cart_id)
       return sendResponse({

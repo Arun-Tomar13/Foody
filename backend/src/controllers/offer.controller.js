@@ -9,6 +9,7 @@ const { limit } = require("../config/db.config");
 const createOffer = async (req, res) => {
   try {
     const userId = req.user;
+    const role = req.role;
     const {
       name,
       type,
@@ -51,7 +52,7 @@ const createOffer = async (req, res) => {
       start_time,
       end_time,
       coupon_code,
-      created_by: userId,
+      created_by: role == rolesConstant.admin ? 0 : userId,
       limit,
     });
 
@@ -99,6 +100,8 @@ const updateOffer = async (req, res) => {
       status,
     } = req.body;
     const { id } = req.params;
+
+    console.log(id);
 
     const isOrderExists = await offerService.getOffer(res, { id });
 
@@ -156,7 +159,7 @@ const getOffers = async (req, res) => {
   try {
     const role = req.role;
     const userId = req.user;
-    
+
     let offer;
     if (role == rolesConstant.admin) {
       offer = await offerService.getOffer(res);
@@ -180,4 +183,78 @@ const getOffers = async (req, res) => {
   }
 };
 
-module.exports = { createOffer, updateOffer,getOffers };
+const applyOffer = async (req, res) => {
+  try {
+    const userId = req.user;
+    const { coupon_code, total } = req.body;
+    const { restaurant_id } = req.query;
+
+    const offer = await offerService.getOffer(res, { coupon_code });
+
+    if (offer.length == 0)
+      return sendResponse({
+        res,
+        statusCode: StatusCodes.BAD_REQUEST,
+        message: "invalid coupon code!",
+        success: false,
+      });
+
+      if (offer[0].min_order_amount > total)
+      return sendResponse({
+        res,
+        statusCode: StatusCodes.BAD_REQUEST,
+        message: "add more item to get offer",
+        success: false,
+      });
+
+    const currentDate = new Date();
+    const date = currentDate.toISOString().split("T")[0];
+    // const time =currentDate.toISOString().split('T')[1].split('.')[0].slice(0,-3)
+
+    if (date < offer[0].start_date || date > offer[0].end_date) {
+      return sendResponse({
+        res,
+        statusCode: StatusCodes.BAD_REQUEST,
+        message: "coupon code is expired!",
+        success: false,
+      });
+    }
+
+    const offerAlreadyUsed = await offerService.offerAlreadyUsed(res, {
+      offer_id: offer[0].id,
+      used_by: userId,
+    });
+
+    if (offerAlreadyUsed.length > 0)
+      return sendResponse({
+        res,
+        statusCode: StatusCodes.BAD_REQUEST,
+        message: "coupon code's limit exceed!",
+        success: false,
+      });
+
+    if (offer[0].created_by && offer[0].created_by != restaurant_id)
+      return sendResponse({
+        res,
+        statusCode: StatusCodes.BAD_REQUEST,
+        message: "coupon is not applicable on this restaurant's time",
+        success: false,
+      });
+
+    return sendResponse({
+      res,
+      statusCode: StatusCodes.OK,
+      message: "offer fetched successfully",
+      data: offer,
+    });
+  } catch (error) {
+    return sendResponse({
+      res,
+      statusCode: StatusCodes.BAD_REQUEST,
+      message: error.message,
+      success: false,
+    });
+  }
+};
+
+module.exports = { createOffer, updateOffer, getOffers, applyOffer };

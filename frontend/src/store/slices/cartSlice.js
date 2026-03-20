@@ -27,6 +27,7 @@ export const getAllCart = createAsyncThunk(
   async (data, { rejectWithValue, dispatch }) => {
     // dispatch(startLoading());
     const res = await getAllItemInCart();
+    
     // dispatch(stopLoading());
     if (res.error) {
       return rejectWithValue(res.error);
@@ -88,9 +89,11 @@ const cartSlice = createSlice({
       .addCase(addCartItem.pending, (state) => {
         state.loading = true;
         state.error = false;
-        state.successMessage=null;
+        state.successMessage=false;
       })
       .addCase(addCartItem.fulfilled, (state, action) => {
+        
+        state.loading = false;
         if (action.payload.success) {
           toast.success(action.payload.message,{position:'bottom-left'})
           if (action.payload.data.updated) {
@@ -147,11 +150,11 @@ const cartSlice = createSlice({
       })
       .addCase(deleteAllCartItem.rejected, (state) => {
         state.loading = false;
+         state.error = false;
       })
       .addCase(decreaseCartItem.pending, (state) => {
         state.loading = true;
         state.error = false;
-        state.successMessage = null;
       })
       .addCase(decreaseCartItem.fulfilled, (state, action) => {
         state.loading = false;
@@ -180,6 +183,7 @@ const cartSlice = createSlice({
       })
       .addCase(decreaseCartItem.rejected, (state) => {
         state.loading = false;
+         state.error = false;
       });
   },
 });

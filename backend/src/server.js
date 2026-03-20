@@ -23,6 +23,7 @@ const transactionTable = require("./models/transaction.model.js");
 const moduleTable = require("./models/module.model.js");
 const actionTable = require("./models/action.model.js");
 const offerTable = require("./models/offer.model.js");
+const offerUsedTable = require("./models/offerUsed.model.js");
 app.use(cors({
   origin:'*',
   withCredentials:true
@@ -63,6 +64,7 @@ app.listen(port, () => {
   moduleTable()
   actionTable()
   offerTable()
+  offerUsedTable()
 
 });
  

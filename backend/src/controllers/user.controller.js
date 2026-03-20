@@ -52,6 +52,36 @@ const getProfile = async (req, res) => {
     });
   }
 };
+const getUserWhoDoesNotHaveRestaurant = async (req, res) => {
+  try {
+    const userId = req.user;
+    const role = req.role
+
+    if (!userId)
+      sendResponse({
+        res,
+        statusCode: StatusCodes.BAD_REQUEST,
+        message: "unauthorized user",
+        success: false,
+      });
+
+    const user = await userService.getRestaurantOwnerWhoNotHaveRestaurant(res);
+    
+    return sendResponse({
+      res,
+      statusCode: StatusCodes.OK,
+      message: "successfully get the user profile",
+      data: user,
+    });
+  } catch (error) {
+    return sendResponse({
+      res,
+      statusCode: StatusCodes.BAD_REQUEST,
+      message: error.message,
+      success: false,
+    });
+  }
+};
 
 // Update
 const updateProfile = async (req, res) => {
@@ -127,4 +157,4 @@ const deleteProfile = async (req, res) => {
   }
 };
 
-module.exports = { getProfile, updateProfile, deleteProfile };
+module.exports = { getProfile, updateProfile, deleteProfile,getUserWhoDoesNotHaveRestaurant };

@@ -55,7 +55,6 @@ const CustomerPage = () => {
       !result.payload.success &&
       result.payload.message == "item is from other restaurant"
     ) {
-      console.log('lala');
       
       setOpenForCartChoice(true);
       setItemId(id);
@@ -177,7 +176,7 @@ const CustomerPage = () => {
               type={"error"}
               variant="filled"
               open={open}
-              message={error ? error.message : errorFromCart.message}
+              message={error ? error?.message : errorFromCart?.message}
             />
           )}
         </Grid>

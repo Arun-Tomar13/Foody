@@ -31,12 +31,14 @@ const updateOffer = async (res, id, data) => {
   }
 };
 
-const getOffer = async (res, data=null) => {
+const getOffer = async (res, data = null) => {
   try {
+    
     const result = await db(tableConstant.offer)
+    .where({status:1})
       .where(function () {
         if (data) {
-          this.where(data);
+          this.where(data)
         }
       })
       .select(
@@ -66,4 +68,19 @@ const getOffer = async (res, data=null) => {
   }
 };
 
-module.exports = { addOffer, getOffer, updateOffer };
+const offerAlreadyUsed = async (res, data) => {
+  try {
+    
+    const result = await db(tableConstant.offerUsed).where(data)
+    return result;
+  } catch (error) {
+    return sendResponse({
+      res,
+      statusCode: StatusCodes.BAD_REQUEST,
+      message: error.message,
+      success: false,
+    });
+  }
+};
+
+module.exports = { addOffer, getOffer, updateOffer,offerAlreadyUsed };

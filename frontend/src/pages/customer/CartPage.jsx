@@ -149,7 +149,6 @@ const CartPage = ({ close }) => {
     const fetchAddress = async () => {
       dispatch(getAllTransactions());
       const address = await dispatch(getAddressByUserId());
-      console.log("all address", address);
     };
     fetchAddress();
   }, []);
@@ -246,9 +245,12 @@ const CartPage = ({ close }) => {
                 disableColumnMenu
                 disableColumnResize
               />
-              <div className="d-flex justify-content-between">
-                <h4>total items{numberOfItems}</h4> <h3>total ${total}</h3>
-              </div>
+              <Grid container direction='column' justifyContent='center' alignItems='center'>
+                <Grid>total items : {numberOfItems}</Grid> 
+                <Grid>items total: {total}</Grid>
+                {/* <Grid>total discount: {total}</Grid>
+                <Grid>final value: {total}</Grid> */}
+              </Grid>
 
               <div className="d-flex justify-content-center">
                 {!curentAddress == "" ? (

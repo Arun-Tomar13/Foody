@@ -204,6 +204,7 @@ const restaurantSlice = createSlice({
           toast.success(action.payload.message);
           state.restaurantList.push(action.payload.data[0]);
           state.restaurant = action.payload.data[0];
+          state.hasRestro = true
         } else {
           state.error = action.payload;
         }

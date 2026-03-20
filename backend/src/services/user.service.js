@@ -1,6 +1,7 @@
 const { StatusCodes } = require("http-status-codes");
 const db = require("../config/db.config");
 const sendResponse = require("../utils/response");
+const { tableConstant, rolesConstant } = require("../utils/constant");
 
 
 const createUser = async (res,data) => {
@@ -87,6 +88,26 @@ const getUserById = async (res,userId) => {
   }
 };
 
+const getRestaurantOwnerWhoNotHaveRestaurant = async (res,userId) => {
+  try {
+    const userData = await db(tableConstant.user)
+    .where('users.role_id', rolesConstant.restaurant_owner)
+    .leftJoin(tableConstant.restaurant,'restaurants.owner_id','users.id')
+    .where('restaurants.name',null)
+    .distinct('users.id as id')
+    .select('users.email as name')
+  
+    return userData;
+  } catch (error) {
+    return sendResponse({
+      res,
+      statusCode: StatusCodes.BAD_REQUEST,
+      message: error.message,
+      success: false,
+    });
+  }
+};
+
 const updateUserById = async (res,userId,updateData) => {
   
   try {
@@ -125,4 +146,4 @@ const removeUserById = async (res,userId) => {
 };
 
 
-module.exports = { getUserByEmail, updateUserByEmail,createUser, getUserById,updateUserById,removeUserById,getUserByEmailOrMobileNo };
+module.exports = { getUserByEmail,getRestaurantOwnerWhoNotHaveRestaurant, updateUserByEmail,createUser, getUserById,updateUserById,removeUserById,getUserByEmailOrMobileNo };

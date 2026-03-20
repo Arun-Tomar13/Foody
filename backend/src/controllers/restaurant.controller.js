@@ -6,7 +6,7 @@ const sendResponse = require("../utils/response");
 // Create Restaurant
 const createRestaurant = async (req, res) => {
   try {
-    const { name, address, type, openingTime, closingTime } = req.body;
+    const { name, address, type, openingTime, closingTime,owner } = req.body;
     const userid = req.user;
 
     const isUserAlreadyHasRestro =
@@ -19,14 +19,14 @@ const createRestaurant = async (req, res) => {
         message: responseMessage.hadRestaurant,
         success: false,
       });
-
+      
     const restaurant = await restaurantService.createRestaurant(res, {
       name,
       address,
       type,
       openingTime,
       closingTime,
-      owner_id: userid,
+      owner_id: owner ? owner : userid,
     });
 
     const resData = await restaurantService.getRestaurantId(res, restaurant[0]);

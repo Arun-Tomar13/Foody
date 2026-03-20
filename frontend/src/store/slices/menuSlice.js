@@ -65,7 +65,6 @@ export const getAllMenu = createAsyncThunk(
     if (res.error) {
       return rejectWithValue(res.error);
     }
-    console.log(res.data);
 
     return res.data;
   },

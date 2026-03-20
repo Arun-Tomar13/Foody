@@ -2,12 +2,12 @@ const express = require('express')
 const router = express.Router();
 const {createRestaurant, updateRestaurant, removeRestaurant,getRestaurantInfoById, getAllRestaurant, removeRestaurantById,changeAvailability, getMenuCountPerRestaurant, OrderCountPerRestaurant, revenuePerRestaurantByDates} = require('../controllers/restaurant.controller');
 const { validate } = require('../middlewares/validate.middleware');
-const { RestaurantSchema, restaurantIdSchema } = require('../validation/restaurant.validation');
+const {  updateRestaurantSchema, createRestaurantSchema } = require('../validation/restaurant.validation');
 const checkPermission = require('../middlewares/role.middleware');
 const { moduleConstant, actionConstant } = require('../utils/constant');
 
-router.post('/',checkPermission(moduleConstant.restaurant,actionConstant.create),validate(RestaurantSchema),createRestaurant)
-router.patch('/:id',checkPermission(moduleConstant.restaurant,actionConstant.update),validate(RestaurantSchema),updateRestaurant)
+router.post('/',checkPermission(moduleConstant.restaurant,actionConstant.create),validate(createRestaurantSchema),createRestaurant)
+router.patch('/:id',checkPermission(moduleConstant.restaurant,actionConstant.update),validate(updateRestaurantSchema),updateRestaurant)
 router.patch('/:id/toggle-availability',checkPermission(moduleConstant.restaurant,actionConstant.update),changeAvailability)
 router.delete('/:id',checkPermission(moduleConstant.restaurant,actionConstant.delete),removeRestaurantById)
 router.get('/order-revenue',checkPermission(moduleConstant.restaurant,actionConstant.admin_only),OrderCountPerRestaurant)

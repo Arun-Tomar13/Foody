@@ -4,6 +4,7 @@ import {
   getUserProfile,
   updateUserProfile,
   logout,
+  getRestaurantOwnerWhoNotHaveRestroApi,
 } from "../../lib/api/userApi";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { startLoading, stopLoading } from "./commonSlice";
@@ -11,6 +12,7 @@ import { toast } from "react-toastify";
 
 const initialState = {
   user: null,
+  restaurant_owner_not_have_restaurant:[],
   error: null,
   loading: null,
 };
@@ -71,6 +73,23 @@ export const getProfile = createAsyncThunk(
     return res.data;
   },
 );
+
+export const getRestaurantOwnerWhoNotHaveRestro = createAsyncThunk(
+  "user/restaurant_owner_not_have_restaurant",
+  async (data=null, { rejectWithValue, dispatch }) => {
+    dispatch(startLoading());
+    const res = await getRestaurantOwnerWhoNotHaveRestroApi();
+
+    dispatch(stopLoading());
+
+    if (res.error) {
+      return rejectWithValue(res.error);
+    }
+
+    return res.data;
+  },
+);
+
 export const updateProfile = createAsyncThunk(
   "user/updateProfile",
   async (data, { rejectWithValue, dispatch }) => {
@@ -148,6 +167,20 @@ const UserSlice = createSlice({
           : (state.error = action.payload);
       })
       .addCase(getProfile.rejected, (state) => {
+        state.loading = false;
+      })
+      .addCase(getRestaurantOwnerWhoNotHaveRestro.pending, (state) => {
+        state.error = null;
+        state.loading = true;
+      })
+      .addCase(getRestaurantOwnerWhoNotHaveRestro.fulfilled, (state, action) => {
+        state.loading = false;
+        
+        action.payload.success
+          ? (state.restaurant_owner_not_have_restaurant = action.payload.data)
+          : (state.error = action.payload);
+      })
+      .addCase(getRestaurantOwnerWhoNotHaveRestro.rejected, (state) => {
         state.loading = false;
       })
       .addCase(updateProfile.pending, (state) => {

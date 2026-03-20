@@ -2,6 +2,8 @@ import { axiosInstance } from "../axios"
 
 const createRestaurantApi = async (data)=>{
     const result = await axiosInstance.post('/restaurant',data)
+    console.log(data);
+    
     return result
 }
 const createRestaurantByAnyoneApi = async (data)=>{
