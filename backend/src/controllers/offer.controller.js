@@ -241,6 +241,8 @@ const applyOffer = async (req, res) => {
         success: false,
       });
 
+      
+
     return sendResponse({
       res,
       statusCode: StatusCodes.OK,

@@ -166,7 +166,7 @@ const CustomerPage = () => {
           <DialogBox
             open={openForCartChoice}
             onClose={handleClose}
-            title={errorFromCart.message}
+            title={errorFromCart?.message}
             component={<ChartItemChoice id={itemId} close={handleClose} />}
           />
 

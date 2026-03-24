@@ -5,7 +5,7 @@ const { StatusCodes } = require("http-status-codes");
 const auth = () => {
   return async (req, res, next) => {
     try {
-      const Bearer = req.get("Authorization");
+      const Bearer = req.get("Authorization") ;
 
       if (!Bearer)
         return sendResponse({
@@ -36,7 +36,7 @@ const auth = () => {
       return sendResponse({
         res,
         statusCode: StatusCodes.UNAUTHORIZED,
-        message: 'invalid toen',
+        message: 'invalid token',
         success: false,
       });
     }

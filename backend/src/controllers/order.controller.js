@@ -17,7 +17,7 @@ const createOrder = async (req, res) => {
   try {
     const cart_id = req.cart;
     const userId = req.user;
-    const { address,coupon_code } = req.body; 
+    const { address } = req.body; 
 
     if (!cart_id)
       return sendResponse({
@@ -27,16 +27,16 @@ const createOrder = async (req, res) => {
         success: false,
       });
 
-      const offer = await offerService.getOffer(res,{coupon_code})
+      // const offer = await offerService.getOffer(res,{coupon_code})
   
-            if (offer.length == 0) {
-              return sendResponse({
-                res,
-                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-                message: "offer does not exists",
-                success: false,
-              });
-            }
+            // if (offer.length == 0) {
+            //   return sendResponse({
+            //     res,
+            //     statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+            //     message: "offer does not exists",
+            //     success: false,
+            //   });
+            // }
 
     const cartItems = await cartItemService.getAllCartItem(res, cart_id);
 
