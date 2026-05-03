@@ -1,0 +1,9 @@
+sr_no,restaurant_name,food_item,price,item_description,item_type,category_name
+1,maharaja,Paneer Butter Masala,200,"Soft paneer cubes in a rich, creamy tomato and cashew nut gravy",veg/nonveg,Main Course
+2,maharaja,Choco Lava Cake,200,A warm chocolate cake with a molten liquid chocolate center.,veg/nonveg,Desert
+3,taj palace,Paneer Chilli Dry,190,"Cubes of cottage cheese, batter-fried and tossed with onions, capsicum, and green chilies in a spicy soy sauce",veg/nonveg,Starter
+4,taj palace,Dal Makhani,280,"Slow-cooked, creamy black lentils with spices, finished with butter and cream",veg/nonveg,Main Course
+5,ascent,Masala Chaas,60,"Refreshing yogurt-based drink, salted (chaas) or sweet (lassi)",veg/nonveg,Beverages
+6,Take It Cheesy,Veg Hakka Noodles,199,"Wok-tossed noodles with shredded vegetables, soy sauce, and garlic.",veg/nonveg,Chinese
+7,Take It Cheesy,Veg Schezwan Fried Rice,99,"Stir-fried rice cooked with veggies in a spicy, fiery Schezwan sauce.",veg/nonveg,Chinese
+8,Take It Cheesy,Triple Schezwan Ric,270,"A combination of fried rice, noodles, and fried noodles served with a thick, spicy Schezwan gravy.",veg/nonveg,Chinese

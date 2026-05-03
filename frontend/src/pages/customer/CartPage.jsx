@@ -70,7 +70,7 @@ const CartPage = ({ close }) => {
       renderCell: (params) => (
         <div>
           <img
-            src={`http://192.168.1.156:8000/${params.row.image}`}
+            src={`${import.meta.env.VITE_Image_URL}/${params.row.image}`}
             className="img-fluid "
             alt="food Img"
           />

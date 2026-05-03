@@ -5,8 +5,9 @@ const { StatusCodes } = require("http-status-codes");
 const auth = () => {
   return async (req, res, next) => {
     try {
-      const Bearer = req.get("Authorization") ;
-
+      const Bearer = req.get("Authorization");
+      
+      
       if (!Bearer)
         return sendResponse({
           res,

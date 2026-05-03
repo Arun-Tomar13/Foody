@@ -94,7 +94,7 @@ const CustomerPage = () => {
                         <CardMedia
                           component="img"
                           height="140"
-                          image={`http://192.168.1.156:8000/${item.image}`}
+                          image={`${import.meta.env.VITE_Image_URL}/${item.image}`}
                           alt={`${item.name} image`}
                         />
                         <CardContent>

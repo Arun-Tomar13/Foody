@@ -71,7 +71,7 @@ const Navbar = () => {
             <Avatar
               src={
                 user
-                  ? `http://192.168.1.156:8000/${user?.user_image}`
+                  ? `${import.meta.env.VITE_Image_URL}/${user?.user_image}`
                   : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
               }
               alt="user Img"

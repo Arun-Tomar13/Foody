@@ -2,14 +2,14 @@ import axios from "axios";
 import { useNavigate } from "react-router";
 
 export const axiosInstance = axios.create({
-    baseURL:'http://192.168.1.156:8000/api',
+    baseURL: import.meta.env.VITE_API_URL,
     headers:{
         Authorization:JSON.parse(localStorage.getItem('Bearer') || null),
     }
 })
 
 export const axiosInstanceWithoutAuth = axios.create({
-    baseURL:'http://192.168.1.156:8000/api'
+    baseURL:import.meta.env.VITE_API_URL,
 })
 
 

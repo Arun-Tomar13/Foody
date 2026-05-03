@@ -46,6 +46,7 @@ const registerUser = async (req, res) => {
       country,
       gender,
     } = req.body;
+console.log('gi');
 
     const user = await userService.getUserByEmailOrMobileNo(res, email,phone);
 

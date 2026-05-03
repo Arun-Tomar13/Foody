@@ -11,31 +11,31 @@ const db = require("../config/db.config");
 const checkPermission = (module_id, action_id) => {
   return async (req, res, next) => {
     try {
-      const role_id = req.role;
+      // const role_id = req.role;
       
-      if (!role_id)
-        return sendResponse({
-          res,
-          statusCode: StatusCodes.UNAUTHORIZED,
-          message: "error while fetching role",
-          success: false,
-        });
+      // if (!role_id)
+      //   return sendResponse({
+      //     res,
+      //     statusCode: StatusCodes.UNAUTHORIZED,
+      //     message: "error while fetching role",
+      //     success: false,
+      //   });
 
-      if (role_id == rolesConstant.admin) {next(); return };
+      // if (role_id == rolesConstant.admin) {next(); return };
 
-      const isHasPermission = await db(tableConstant.permission).where({
-        role_id,
-        module_id,
-        action_id,
-      });
+      // const isHasPermission = await db(tableConstant.permission).where({
+      //   role_id,
+      //   module_id,
+      //   action_id,
+      // });
 
-      if (isHasPermission.length == 0)
-        return sendResponse({
-          res,
-          statusCode: StatusCodes.UNAUTHORIZED,
-          message: "permission denied",
-          success: false,
-        });
+      // if (isHasPermission.length == 0)
+      //   return sendResponse({
+      //     res,
+      //     statusCode: StatusCodes.UNAUTHORIZED,
+      //     message: "permission denied",
+      //     success: false,
+      //   });
 
       next();
     } catch (error) {
