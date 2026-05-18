@@ -44,7 +44,7 @@ const AddCategoryForm = ({ data, fn, close, restaurant_id = null }) => {
     else result = await dispatch(fn({ inputData: data }));
     console.log(result);
 
-    if (result.payload.success) {
+    if (result.payload?.success) {
       close();
     }
   };

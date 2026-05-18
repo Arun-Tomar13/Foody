@@ -1,5 +1,5 @@
 import "./App.css";
-import { Navigate, Route, Routes, useNavigate } from "react-router";
+import { Route, Routes, useLocation, useNavigate } from "react-router";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
@@ -13,23 +13,37 @@ import RestaurantDashboard from "./pages/Restaurant/RestaurantDashboard";
 import Transaction from "./pages/customer/Transactions";
 import Dashboard from "./components/charts/Dashboard";
 import Unauthorized from "./pages/Unauthorized";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { USER_ROLES } from "./constant";
 import { useEffect } from "react";
-import { getProfile } from "./store/slices/userSlice";
+import { clearAuthState, getProfile } from "./store/slices/userSlice";
 import ProtectedRoute from "./pages/ProtectedRoute";
 import PageNotFound from "./components/PageNotFound";
 
+const hasBearerToken = () => {
+  const token = localStorage.getItem("Bearer")?.trim();
+
+  return Boolean(token && token !== "null" && token !== "undefined");
+};
+
 function App() {
   const dispatch = useDispatch()
+  const location = useLocation()
   const navigate = useNavigate()
 
   // error
   useEffect(() => {
-     dispatch(getProfile());
-     
-    if(localStorage.getItem('Bearer')?.trim()=='' || !localStorage.getItem('Bearer')) navigate("/login");
-  }, []);
+    const isPublicRoute = ["/login", "/register"].includes(location.pathname);
+
+    if (hasBearerToken()) {
+      dispatch(getProfile());
+      return;
+    }
+
+    dispatch(clearAuthState());
+
+    if (!isPublicRoute) navigate("/login", { replace: true });
+  }, [dispatch, location.pathname, navigate]);
 
   return (
     <Routes>

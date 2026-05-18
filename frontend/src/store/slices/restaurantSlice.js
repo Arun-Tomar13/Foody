@@ -11,7 +11,6 @@ import {
   toggleAvailabilty,
   updateRestaurantApi,
 } from "../../lib/api/restaurantApi";
-import { toast } from "react-toastify";
 
 const initialState = {
   restaurant: null,
@@ -201,7 +200,6 @@ const restaurantSlice = createSlice({
         state.loading = false;
 
         if (action.payload.success) {
-          toast.success(action.payload.message);
           state.restaurantList.push(action.payload.data[0]);
           state.restaurant = action.payload.data[0];
           state.hasRestro = true
@@ -209,8 +207,9 @@ const restaurantSlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(addRestaurant.rejected, (state) => {
+      .addCase(addRestaurant.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       })
       .addCase(removeRestaurantById.pending, (state) => {
         state.loading = true;
@@ -220,7 +219,6 @@ const restaurantSlice = createSlice({
         state.loading = false;
 
         if (action.payload.success) {
-          toast.success(action.payload.message);
           state.restaurantList = state.restaurantList.filter(
             (r) => r.id != action.payload.data,
           );
@@ -228,8 +226,9 @@ const restaurantSlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(removeRestaurantById.rejected, (state) => {
+      .addCase(removeRestaurantById.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       })
       .addCase(updateRestaurant.pending, (state) => {
         state.loading = true;
@@ -239,14 +238,14 @@ const restaurantSlice = createSlice({
         state.loading = false;
 
         if (action.payload.success) {
-          toast.success(action.payload.message);
           state.restaurant = action.payload.data;
         } else {
           state.error = action.payload;
         }
       })
-      .addCase(updateRestaurant.rejected, (state) => {
+      .addCase(updateRestaurant.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       })
       .addCase(getRestaurantInfoById.pending, (state) => {
         state.loading = true;
@@ -263,8 +262,9 @@ const restaurantSlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(getRestaurantInfoById.rejected, (state) => {
+      .addCase(getRestaurantInfoById.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       })
       .addCase(MenuPerRestaurant.pending, (state) => {
         state.loading = true;
@@ -279,8 +279,9 @@ const restaurantSlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(MenuPerRestaurant.rejected, (state) => {
+      .addCase(MenuPerRestaurant.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       })
       .addCase(orderAndRevenuePerRestaurant.pending, (state) => {
         state.loading = true;
@@ -295,8 +296,9 @@ const restaurantSlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(orderAndRevenuePerRestaurant.rejected, (state) => {
+      .addCase(orderAndRevenuePerRestaurant.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       })
       .addCase(getAllRestaurant.pending, (state) => {
         state.loading = true;
@@ -311,8 +313,9 @@ const restaurantSlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(getAllRestaurant.rejected, (state) => {
+      .addCase(getAllRestaurant.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       })
       .addCase(changeRestaurantAvailability.pending, (state) => {
         state.loading = true;
@@ -322,7 +325,6 @@ const restaurantSlice = createSlice({
         state.loading = false;
 
         if (action.payload.success) {
-          toast.success(state.restaurant.isOpen ? 'restaurant is closed' : 'restaurant is now open');
           state.restaurant.isOpen = !state.restaurant.isOpen;
           state.restaurantList = state.restaurantList.map((restaurant) => {
             return restaurant.id == action.payload.data
@@ -333,8 +335,9 @@ const restaurantSlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(changeRestaurantAvailability.rejected, (state) => {
+      .addCase(changeRestaurantAvailability.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       });
   },
 });

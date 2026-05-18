@@ -12,7 +12,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { getRestaurantOwnerWhoNotHaveRestro } from "../../store/slices/userSlice";
 import SelectInput from "../../components/InputFields/SelectInput";
-import { useState } from "react";
 import { toast } from "react-toastify";
 
 const CreateRestaurantPage = ({close}) => {
@@ -52,7 +51,7 @@ const CreateRestaurantPage = ({close}) => {
     }
     if(!data.owner) data.owner = 0
     const result  = await dispatch(addRestaurant(data))
-    if(result.payload.success ) close()
+    if(result.payload?.success ) close()
     
   };
 

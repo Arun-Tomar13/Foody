@@ -1,142 +1,233 @@
-import { Button, Grid, Typography } from "@mui/material";
+import {
+  Button,
+  Paper,
+  Typography,
+} from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllTransactions } from "../../store/slices/transactionSlice";
-import { useState } from "react";
 import DialogBox from "../../components/InputFields/DialogBox";
 import TopUp from "./TopUp";
-import CustomSnackbar from "../../components/CustomSnackbar";
+import {
+  ArrowDownCircle,
+  ArrowUpCircle,
+  Wallet,
+  Plus,
+} from "lucide-react";
 
 const Transaction = () => {
   const [open, setOpen] = useState(false);
-  const [openSnackbar, setOpenSnackbar] = useState(false);
+
   const dispatch = useDispatch();
 
-  const { error,loading,transactionList, credit, debit, balance,successMessage } = useSelector(
+  const {
+    transactionList,
+    credit,
+    debit,
+    balance,
+  } = useSelector(
     (state) => state.transaction,
   );
-console.log(successMessage);
 
   useEffect(() => {
-      if (error || successMessage) {
-        setOpenSnackbar(true);
-        setTimeout(() => {
-          setOpenSnackbar(false);
-        }, 2000);
-      }
-    }, [error,successMessage]);
-
-  useEffect(() => {
-    const fatchTransactions = async () => {
-      const result = await dispatch(getAllTransactions());
-      console.log(result);
-    };
-    fatchTransactions();
-  }, []);
+    dispatch(getAllTransactions());
+  }, [dispatch]);
 
   const columns = [
     {
       field: "transaction_type",
       headerName: "For",
+      flex: 1,
+      minWidth: 160,
       sortable: false,
+      renderCell: (params) =><div>{params.row.transaction_type === "top-up" ? "Wallet Top-up" : "Order Payment"}</div>
     },
-    {
-      field: "type",
-      headerName: "Type",
-      sortable: false,
-      renderCell: (params) => (
-        <div>{params.row.credit ? "credit" : "debit"}</div>
-      ),
-    },
+   {
+  field: "type",
+  headerName: "Type",
+  flex: 1,
+  minWidth: 120,
+  sortable: false,
+  renderCell: (params) => (
+    <div
+      className={`transaction-chip ${
+        params.row.credit
+          ? "transaction-chip--credit"
+          : "transaction-chip--debit"
+      }`}
+    >
+      {params.row.credit ? "Credit" : "Debit"}
+    </div>
+  ),
+},
     {
       field: "price",
       headerName: "Amount",
+      flex: 1,
+      minWidth: 120,
       sortable: false,
       renderCell: (params) => (
-        <div>{params.row.credit ? params.row.credit : params.row.debit}</div>
+        <strong>
+          ₹
+          {params.row.credit
+            ? params.row.credit
+            : params.row.debit}
+        </strong>
       ),
     },
     {
       field: "date",
       headerName: "Date",
+      flex: 1,
+      minWidth: 120,
       sortable: false,
-      width: "100",
-      renderCell: (params) => <div>{params.row.date.split("T")[0]}</div>,
+      renderCell: (params) => (
+        <span>
+          {params.row.date.split("T")[0]}
+        </span>
+      ),
     },
     {
       field: "time",
       headerName: "Time",
+      flex: 1,
+      minWidth: 120,
       sortable: false,
-      width: "100",
       renderCell: (params) => (
-        <div>{params.row.date.split("T")[1].split(".")[0]}</div>
+        <span>
+          {
+            params.row.date
+              .split("T")[1]
+              .split(".")[0]
+          }
+        </span>
       ),
     },
     {
       field: "transaction_id",
-      headerName: "transaction id",
+      headerName: "Transaction ID",
+      flex: 1.4,
+      minWidth: 220,
       sortable: false,
-      width: "150",
     },
   ];
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
   return (
-    <div className="d-flex flex-column justify-content-between">
-      {transactionList && (
-        <div className="d-flex flex-column gap-3">
-            <Grid><h1 className="text-primary">Your transactions</h1></Grid>
-          <div className="d-flex justify-content-between">
-          <Grid container direction='column' spacing={1} >
-            <Grid container >
-              <h2 >Balance: ₹{balance}</h2>
-            </Grid>
-            <Grid container spacing={5} >
-              <h4>Credit: ₹{credit}</h4> <h4>Debit: ₹{debit} </h4>
-            </Grid>
-          </Grid>
-            <Grid>
-                <Button onClick={handleClickOpen} variant="contained">
-              Top Up
-            </Button>
-            <DialogBox
-              open={open}
-              onClose={handleClose}
-              title="Cart"
-              component={<TopUp close={handleClose} />}
-            />
-            </Grid>
-            {/* Error Text */}
-            {(error || successMessage) && (
-              <CustomSnackbar type={error ? 'error' : 'success'} variant="filled" open={openSnackbar} message={error ? error.message : successMessage} />
-            )}
-          </div>
-          <DataGrid
-            rows={transactionList}
-            columns={columns}
-            initialState={{
-              pagination: {
-                paginationModel: {
-                  pageSize: 5,
-                },
-              },
-            }}
-            pageSizeOptions={[5]}
-            disableRowSelectionOnClick
-            disableColumnFilter
-            disableColumnMenu
-            disableColumnResize
-          />
+    <div className="transactions-page">
+      <div className="transactions-header">
+        <div>
+          <Typography
+            variant="h4"
+            fontWeight={800}
+          >
+            Wallet & Transactions
+          </Typography>
+
+          <Typography
+            variant="body1"
+            color="text.secondary"
+          >
+            Manage your wallet and track
+            transaction history
+          </Typography>
         </div>
-      )}
+
+        <Button
+          variant="contained"
+          startIcon={<Plus size={18} />}
+          onClick={() => setOpen(true)}
+          sx={{
+            borderRadius: "12px",
+            textTransform: "none",
+            backgroundColor: "#f97316",
+            px: 2.5,
+            py: 1.2,
+            fontWeight: 700,
+            "&:hover": {
+              backgroundColor: "#ea580c",
+            },
+          }}
+        >
+          Top Up
+        </Button>
+      </div>
+
+      <div className="transactions-stats">
+        <Paper className="transactions-stat-card">
+          <div className="transactions-stat-icon">
+            <Wallet size={22} />
+          </div>
+
+          <div>
+            <h3>₹{balance}</h3>
+            <p>Wallet Balance</p>
+          </div>
+        </Paper>
+
+        <Paper className="transactions-stat-card">
+          <div className="transactions-stat-icon credit">
+            <ArrowUpCircle size={22} />
+          </div>
+
+          <div>
+            <h3>₹{credit}</h3>
+            <p>Total Credit</p>
+          </div>
+        </Paper>
+
+        <Paper className="transactions-stat-card">
+          <div className="transactions-stat-icon debit">
+            <ArrowDownCircle size={22} />
+          </div>
+
+          <div>
+            <h3>₹{debit}</h3>
+            <p>Total Debit</p>
+          </div>
+        </Paper>
+      </div>
+
+      <Paper className="transactions-table-wrapper">
+        <div className="transactions-table-head">
+          <div>
+            <h3>Recent Transactions</h3>
+            <span>
+              Your wallet activity history
+            </span>
+          </div>
+        </div>
+
+        <DataGrid
+          rows={transactionList || []}
+          columns={columns}
+          autoHeight
+          initialState={{
+            pagination: {
+              paginationModel: {
+                pageSize: 5,
+              },
+            },
+          }}
+          pageSizeOptions={transactionList?.length <= 5 ? [5] : [5, 10]}
+          disableRowSelectionOnClick
+          disableColumnFilter
+          disableColumnMenu
+          disableColumnResize
+          className="foody-transactions-grid"
+        />
+      </Paper>
+
+      <DialogBox
+        open={open}
+        onClose={() => setOpen(false)}
+        title="Top up wallet"
+        maxWidth="sm"
+        component={
+          <TopUp close={() => setOpen(false)} />
+        }
+      />
+
     </div>
   );
 };

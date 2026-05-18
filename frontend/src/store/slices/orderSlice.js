@@ -89,8 +89,9 @@ const orderSlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(createOrder.rejected, (state) => {
+      .addCase(createOrder.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       })
       .addCase(getAllOrder.pending, (state) => {
         state.loading = true;
@@ -109,8 +110,9 @@ const orderSlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(getAllOrder.rejected, (state) => {
+      .addCase(getAllOrder.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       })
       .addCase(getOrderItemById.pending, (state) => {
         state.loading = true;
@@ -130,8 +132,9 @@ const orderSlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(getOrderItemById.rejected, (state) => {
+      .addCase(getOrderItemById.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       })
       .addCase(generateCSVOdOrders.pending, (state) => {
         state.loading = true;
@@ -146,8 +149,9 @@ const orderSlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(generateCSVOdOrders.rejected, (state) => {
+      .addCase(generateCSVOdOrders.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       });
   },
 });

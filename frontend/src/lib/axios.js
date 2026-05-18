@@ -1,10 +1,23 @@
 import axios from "axios";
-import { useNavigate } from "react-router";
+import { getApiErrorPayload } from "../utils/feedback";
+
+const getStoredBearer = () => {
+  const token = localStorage.getItem("Bearer");
+
+  if (!token || token === "null" || token === "undefined") return null;
+
+  try {
+    return JSON.parse(token);
+  } catch {
+    localStorage.removeItem("Bearer");
+    return null;
+  }
+};
 
 export const axiosInstance = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
     headers:{
-        Authorization:JSON.parse(localStorage.getItem('Bearer') || null),
+        Authorization:getStoredBearer(),
     }
 })
 
@@ -14,7 +27,7 @@ export const axiosInstanceWithoutAuth = axios.create({
 
 
 axiosInstance.interceptors.request.use(config => {
-  const Bearer = JSON.parse(localStorage.getItem('Bearer'));
+  const Bearer = getStoredBearer();
   
   if (Bearer) {
     config.headers.Authorization = Bearer;
@@ -22,16 +35,28 @@ axiosInstance.interceptors.request.use(config => {
   return config;
 });
 
-axiosInstance.interceptors.response.use(function onFulfilled(response) {
+const handleAuthRedirect = (response) => {
      if(!response.data.success && (response.data.message=='invalid token' || response.data.message=='Unauthorized user')){ 
-
+      localStorage.removeItem('Bearer');
       if(window.location.pathname!='/login') window.location.href = '/login'
       
       return response;
      }
      return response;
-  }, function onRejected(error) {
-    // Any status codes that falls outside the range of 2xx cause this function to trigger
-    // Do something with response error
-    return Promise.reject(error);
+  };
+
+const handleRejectedResponse = (error) => {
+  const errorPayload = getApiErrorPayload(error);
+
+  return Promise.resolve({
+    data: errorPayload,
+    error: errorPayload,
+    status: error?.response?.status,
   });
+};
+
+axiosInstance.interceptors.response.use(handleAuthRedirect, handleRejectedResponse);
+axiosInstanceWithoutAuth.interceptors.response.use(
+  (response) => response,
+  handleRejectedResponse,
+);

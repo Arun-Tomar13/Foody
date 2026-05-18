@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addCategory,
@@ -7,30 +7,24 @@ import {
   removeCategory,
   updateCategory,
 } from "../store/slices/categorySlice";
-import { Button, Grid } from "@mui/material";
+import { Button } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import { DeleteIcon, Pen, Plus } from "lucide-react";
+import { Eye, Pen, Plus, Trash2, Upload } from "lucide-react";
 import AddCategoryForm from "./AddCategoryForm";
 import DialogBox from "./InputFields/DialogBox";
-import { Link, useParams } from "react-router";
+import { Link } from "react-router";
 import AddCategoryInBulk from "./AddCategoryInBulk";
-import CustomSnackbar from "./CustomSnackbar";
+import { FOODY_DATA_GRID_SX } from "../constants/dataGridConfig";
 
-const AllCategories = ({ id=null }) => {
+const AllCategories = ({ id = null }) => {
   const dispatch = useDispatch();
 
   const [openforAdd, setOpenforAdd] = useState(false);
   const [openforBulkUpload, setOpenforBulkUpload] = useState(false);
   const [openForUpdate, setOpenforUpdate] = useState(false);
-  const [open, setOpen] = useState(false);
-  const {categoryList, error,loading } = useSelector((state) => state.category);
-
-  const handleClickOpenForAdd = () => {
-    setOpenforAdd(true);
-  };
-  const handleClickOpenForUpdate = () => {
-    setOpenforUpdate(true);
-  };
+  const { categoryList, loading, category } = useSelector(
+    (state) => state.category,
+  );
 
   const handleClose = () => {
     setOpenforAdd(false);
@@ -39,160 +33,184 @@ const AllCategories = ({ id=null }) => {
   };
 
   useEffect(() => {
-    if (error) {
-      setOpen(true);
-      setTimeout(() => {
-        setOpen(false);
-      }, 5000);
-    }
-  }, [error]);
-
-  useEffect(() => {
     const fetchCategory = async () => {
-      let result;
-      
-      if(id) result = await dispatch(getAllCategories({id}));
-      else result = await dispatch(getAllCategories({}));
-      
+      if (id) {
+        await dispatch(getAllCategories({ id }));
+        return;
+      }
+
+      await dispatch(getAllCategories({}));
     };
+
     fetchCategory();
-  }, []);
+  }, [dispatch, id]);
 
-  const handleDelete = async (id) => {
-    const result = await dispatch(removeCategory(id));
+  const handleDelete = async (categoryId) => {
+    await dispatch(removeCategory(categoryId));
   };
-
-  const { category } = useSelector((state) => state.category);
 
   const columns = [
     {
       field: "name",
-      headerName: "Name",
+      headerName: "Category",
       sortable: false,
-      width: "100",
+      flex: 0.8,
+      minWidth: 150,
+      renderCell: (params) => (
+        <span className="grid-cell-name">{params.row.name}</span>
+      ),
     },
     {
       field: "description",
       headerName: "Description",
       sortable: false,
-      width: "200",
+      flex: 1.4,
+      minWidth: 220,
     },
     {
       field: "isAvailable",
-      headerName: "Available",
+      headerName: "Status",
       sortable: false,
-      width: "100",
-      renderCell: (params) => params.row.isAvailable ? 'yes' : 'no'
+      minWidth: 120,
+      renderCell: (params) => (
+        <span className="grid-status-cell">
+          <span
+            className={`status-pill status-pill--compact ${
+              params.row.isAvailable ? "open" : "closed"
+            }`}
+          >
+            {params.row.isAvailable ? "available" : "paused"}
+          </span>
+        </span>
+      ),
+    },
+    {
+      field: "view",
+      headerName: "Menu",
+      sortable: false,
+      minWidth: 110,
+      renderCell: (params) => (
+        <Button
+          component={Link}
+          to={`/restaurant${id ? `/${id}` : ""}/category/${params.row.id}`}
+          size="small"
+          startIcon={<Eye size={15} />}
+          sx={{ color: "#c2410c", fontWeight: 800 }}
+        >
+          View
+        </Button>
+      ),
     },
     {
       field: "edit",
       headerName: "Edit",
       sortable: false,
-      width: "100",
+      minWidth: 90,
       renderCell: (params) => (
-        <div>
-          <Button
-            onClick={async () => {
-              // setValue(params.row);
-              await dispatch(getCategoryInfoById(params.row.id));
-              handleClickOpenForUpdate();
-            }}
-          >
-            <Pen />
-          </Button>
-        </div>
+        <button
+          type="button"
+          className="grid-action-btn grid-action-btn--edit"
+          aria-label={`Edit ${params.row.name}`}
+          onClick={async () => {
+            await dispatch(getCategoryInfoById(params.row.id));
+            setOpenforUpdate(true);
+          }}
+        >
+          <Pen size={17} />
+        </button>
       ),
     },
     {
       field: "remove",
       headerName: "Remove",
       sortable: false,
-      width: "100",
+      minWidth: 100,
       renderCell: (params) => (
-        <Button onClick={() => handleDelete(params.row.id)}>
-          <DeleteIcon color="red" />
-        </Button>
-      ),
-    },
-    {
-      field: "view",
-      headerName: "see menu",
-      sortable: false,
-      width: "100",
-      renderCell: (params) => (
-        <Link to={`/restaurant${id ? `/${id}` : ''}/category/${params.row.id}`}>menu</Link>
+        <button
+          type="button"
+          className="grid-action-btn grid-action-btn--danger"
+          aria-label={`Remove ${params.row.name}`}
+          onClick={() => handleDelete(params.row.id)}
+        >
+          <Trash2 size={17} />
+        </button>
       ),
     },
   ];
 
   return (
-    <Grid container direction="column" spacing={2}>
-      <Grid className="d-flex justify-content-between">
-        <h3>Categories</h3>
-        <div className="d-flex gap-3">
+    <>
+      <div className="dashboard-toolbar">
+        <div>
+          <p className="dashboard-eyebrow">Menu structure</p>
+          <h3 className="foody-section-title">Categories</h3>
+          <p className="foody-muted">
+            Group dishes into clean customer-facing sections.
+          </p>
+        </div>
+        <div className="dashboard-actions">
           <Button
             variant="outlined"
-            color="success"
-            onClick={() => {
-              setOpenforBulkUpload(true);
-            }}
+            startIcon={<Upload size={17} />}
+            onClick={() => setOpenforBulkUpload(true)}
+            sx={{ borderRadius: "999px", color: "#16803c", borderColor: "#16803c" }}
           >
-            <Plus />
-            Bulk Upload
+            Bulk upload
           </Button>
 
           <Button
-            variant="outlined"
-            color="success"
-            onClick={() => {
-              handleClickOpenForAdd();
+            variant="contained"
+            startIcon={<Plus size={17} />}
+            onClick={() => setOpenforAdd(true)}
+            sx={{
+              borderRadius: "999px",
+              backgroundColor: "#f97316",
+              fontWeight: 850,
+              "&:hover": { backgroundColor: "#c2410c" },
             }}
           >
-            <Plus />
-            Add
+            Category
           </Button>
         </div>
 
-        {/* bulk upload dialogbox */}
         <DialogBox
           open={openforBulkUpload}
           onClose={handleClose}
-          title="bulk upload of categories"
+          title="Bulk upload categories"
+          maxWidth="md"
           component={<AddCategoryInBulk close={handleClose} />}
         />
 
-        {/* add dialogbox */}
         <DialogBox
           open={openforAdd}
           onClose={handleClose}
-          title="add category"
+          title="Add category"
+          maxWidth="sm"
           component={
             <AddCategoryForm
               fn={addCategory}
               close={handleClose}
-              data={{ name: "", description: "",isAvailable:1 }}
-              restaurant_id= {id ? id : null}
+              data={{ name: "", description: "", isAvailable: 1 }}
+              restaurant_id={id ? id : null}
             />
           }
         />
-      </Grid>
+      </div>
 
-      <Grid>
-        {/* update dialogbox */}
-        <DialogBox
-          open={openForUpdate}
-          onClose={handleClose}
-          title="update category"
-          component={
-            <AddCategoryForm
-              fn={updateCategory}
-              data={category}
-              close={handleClose}
-            />
-          }
-        />
+      <DialogBox
+        open={openForUpdate}
+        onClose={handleClose}
+        title="Update category"
+        maxWidth="sm"
+        component={
+          <AddCategoryForm fn={updateCategory} data={category} close={handleClose} />
+        }
+      />
+
+      <div className="foody-table-card">
         <DataGrid
-          rows={categoryList}
+          className="foody-data-grid"
+          rows={categoryList || []}
           columns={columns}
           initialState={{
             pagination: {
@@ -202,20 +220,17 @@ const AllCategories = ({ id=null }) => {
             },
           }}
           loading={loading}
-          pageSizeOptions={[5]}
+          pageSizeOptions={[10]}
           disableRowSelectionOnClick
+          disableColumnFilter
+          disableColumnMenu
+          disableColumnResize
+          rowHeight={58}
+          sx={FOODY_DATA_GRID_SX}
         />
-      </Grid>
-      {/* Error Text */}
-      {error && (
-        <CustomSnackbar
-          type="error"
-          variant="filled"
-          open={open}
-          message={error.message}
-        />
-      )}
-    </Grid>
+      </div>
+
+    </>
   );
 };
 

@@ -7,7 +7,6 @@ import {
   getCategoryByIdApi,
   updateCategoryApi,
 } from "../../lib/api/categoryApi";
-import { toast } from "react-toastify";
 
 
 const initialState = {
@@ -120,14 +119,14 @@ const categorySlice = createSlice({
       .addCase(addCategory.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload.success) {
-          toast.success(action.payload.message);
           state.categoryList.push(action.payload.data[0]);
         } else {
           state.error = action.payload;
         }
       })
-      .addCase(addCategory.rejected, (state) => {
+      .addCase(addCategory.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       })
       .addCase(bulkUpload.pending, (state) => {
         state.loading = true;
@@ -137,7 +136,6 @@ const categorySlice = createSlice({
         state.loading = false;
         
         if (action.payload.success) {
-          toast.success(action.payload.message);
           action.payload.data.forEach((data) => {
             state.categoryList.push(data);
           });
@@ -145,8 +143,9 @@ const categorySlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(bulkUpload.rejected, (state) => {
+      .addCase(bulkUpload.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       })
       .addCase(removeCategory.pending, (state) => {
         state.loading = true;
@@ -155,7 +154,6 @@ const categorySlice = createSlice({
       .addCase(removeCategory.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload.success) {
-          toast.success(action.payload.message);
           state.categoryList = state.categoryList.filter(
             (r) => r.id != action.payload.data,
           );
@@ -163,8 +161,9 @@ const categorySlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(removeCategory.rejected, (state) => {
+      .addCase(removeCategory.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       })
       .addCase(updateCategory.pending, (state) => {
         state.loading = true;
@@ -173,7 +172,6 @@ const categorySlice = createSlice({
       .addCase(updateCategory.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload.success) {
-          toast.success(action.payload.message);
           state.categoryList = state.categoryList.map((item) => {
             return item.id == action.payload.data[0].id
               ? {
@@ -188,8 +186,9 @@ const categorySlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(updateCategory.rejected, (state) => {
+      .addCase(updateCategory.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       })
       .addCase(getCategoryInfoById.pending, (state) => {
         state.loading = true;
@@ -203,8 +202,9 @@ const categorySlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(getCategoryInfoById.rejected, (state) => {
+      .addCase(getCategoryInfoById.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       })
       .addCase(getAllCategories.pending, (state) => {
         state.loading = true;
@@ -218,8 +218,9 @@ const categorySlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(getAllCategories.rejected, (state) => {
+      .addCase(getAllCategories.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       });
   },
 });

@@ -1,17 +1,16 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  Grid,
+  Box,
   Button,
-  TextField,
-  Select,
-  MenuItem,
-  InputLabel,
   FormControl,
-  Switch,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
 } from "@mui/material";
-import { DeleteIcon, Pen, Plus } from "lucide-react";
+import { ArrowLeft, Pen, Plus, Search, Trash2, Upload } from "lucide-react";
 import {
   addMenu,
   getAllMenu,
@@ -19,27 +18,28 @@ import {
   removeMenu,
   updateMenu,
 } from "../../store/slices/menuSlice";
-import { useNavigate, useParams } from "react-router";
+import { useParams } from "react-router";
 import AddMenuItemForm from "../../components/AddMenuItemForm";
 import DialogBox from "../../components/InputFields/DialogBox";
 import { getAllCategories } from "../../store/slices/categorySlice";
 import BulkMenuAdd from "../../components/BulkMenuAdd";
-import CustomSnackbar from "../../components/CustomSnackbar";
+import { FOODY_DATA_GRID_SX } from "../../constants/dataGridConfig";
 
 const GetAllMenu = () => {
   const [openforAdd, setOpenforAdd] = useState(false);
   const [openForUpdate, setOpenforUpdate] = useState(false);
   const [openForBulkUpload, setOpenForBulkUpload] = useState(false);
-  const [open, setOpen] = useState(false);
   const [page, setpage] = useState(0);
   const [limit, setLimit] = useState(4);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
 
-  const { menuItem, menuList, totalMenu, error, loading } = useSelector(
+  const { menuItem, menuList, totalMenu, loading } = useSelector(
     (state) => state.menu,
   );
   const { categoryList } = useSelector((state) => state.category);
+  const { categoryid, id } = useParams();
+  const dispatch = useDispatch();
 
   const handleClose = () => {
     setOpenforAdd(false);
@@ -47,131 +47,190 @@ const GetAllMenu = () => {
     setOpenForBulkUpload(false);
   };
 
-  const removeMenuItem = async (id) => {
-    const result = await dispatch(removeMenu(id));
+  const removeMenuItem = async (menuId) => {
+    await dispatch(removeMenu(menuId));
   };
 
   useEffect(() => {
-    if (error) {
-      setOpen(true);
-      setTimeout(() => {
-        setOpen(false);
-      }, 2000);
-    }
-  }, [error]);
-
-  
-  const { categoryid, id } = useParams();
-  const dispatch = useDispatch();
-
-  useEffect(() => {
     const getCategories = async () => {
-      let result;
-      if (id) result = await dispatch(getAllCategories({ id }));
-      else result = await dispatch(getAllCategories({}));
+      if (id) {
+        await dispatch(getAllCategories({ id }));
+        return;
+      }
+
+      await dispatch(getAllCategories({}));
     };
+
     getCategories();
-  }, []);
+  }, [dispatch, id]);
 
   useEffect(() => {
-    let data;
+    const payload = {
+      page,
+      limit,
+      restaurantid: id,
+      categoryid: categoryid || categoryFilter,
+      searchQuery,
+    };
 
     if (searchQuery) {
-      const getData = setTimeout(async () => {
-        data = await dispatch(
-          getAllMenu({
-            page,
-            limit,
-            restaurantid: id,
-            categoryid: categoryid || categoryFilter,
-            searchQuery,
-          }),
-        );
+      const getData = setTimeout(() => {
+        dispatch(getAllMenu(payload));
       }, 500);
+
       return () => clearTimeout(getData);
-    } else {
-      data = dispatch(
-        getAllMenu({
-          page,
-          limit,
-          restaurantid: id,
-          categoryid: categoryid || categoryFilter,
-        }),
-      );
     }
-  }, [page, limit, searchQuery, categoryFilter]);
+
+    dispatch(getAllMenu(payload));
+  }, [categoryFilter, categoryid, dispatch, id, limit, page, searchQuery]);
 
   const columns = [
     {
       field: "image",
-      headerName: "Image",
+      headerName: "Dish",
       sortable: false,
+      minWidth: 95,
       renderCell: (params) => (
-        <div>
-          <img
-            src={`${import.meta.env.VITE_Image_URL}/${params.row.image}`}
-            className="img-fluid "
-            alt="food Img"
-          />
-        </div>
+        <img
+          src={`${import.meta.env.VITE_Image_URL}/${params.row.image}`}
+          className="menu-grid-thumb"
+          alt={`${params.row.name} dish`}
+        />
       ),
     },
     {
       field: "name",
       headerName: "Name",
       sortable: false,
+      flex: 0.9,
+      minWidth: 140,
+      renderCell: (params) => (
+        <span className="grid-cell-name">{params.row.name}</span>
+      ),
     },
     {
       field: "type",
       headerName: "Type",
       sortable: false,
+      minWidth: 100,
+      renderCell: (params) => (
+        <Box
+          sx={{
+            px: 1.6,
+            py: 0.45,
+            borderRadius: "999px",
+
+            fontSize: "0.72rem",
+            fontWeight: 800,
+
+            textTransform: "uppercase",
+            letterSpacing: "0.04em",
+
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: 30,
+
+            minWidth: 72,
+
+            background:
+              params.row.type === "veg"
+                ? "linear-gradient(135deg,#dcfce7,#bbf7d0)"
+                : "linear-gradient(135deg,#fee2e2,#fecaca)",
+
+            color:
+              params.row.type === "veg"
+                ? "#166534"
+                : "#991b1b",
+
+            border:
+              params.row.type === "veg"
+                ? "1px solid #86efac"
+                : "1px solid #fca5a5",
+
+            boxShadow:
+              params.row.type === "veg"
+                ? "0 6px 14px rgba(34,197,94,0.12)"
+                : "0 6px 14px rgba(239,68,68,0.12)",
+          }}
+        >
+          {params.row.type === "veg"
+            ? "🟢 Veg"
+            : "🔴 Non Veg"}
+        </Box>
+      ),
     },
     {
       field: "description",
       headerName: "Description",
       sortable: false,
+      flex: 1.4,
+      minWidth: 230,
     },
     {
       field: "category_id",
       headerName: "Category",
       sortable: false,
+      minWidth: 115,
     },
     {
       field: "price",
       headerName: "Price",
       sortable: false,
+      minWidth: 95,
+      renderCell: (params) => (
+        <span className="grid-cell-price">Rs. {params.row.price}</span>
+      ),
     },
     {
       field: "isAvailable",
-      headerName: "Available",
+      headerName: "Status",
       sortable: false,
-      renderCell: (params) => <div>{params.row.isAvailable ? 'Yes' : "No"}</div>
+      minWidth: 125,
+      renderCell: (params) => (
+        <span className="grid-status-cell">
+          <span
+            className={`status-pill status-pill--compact ${params.row.isAvailable ? "open" : "closed"
+              }`}
+          >
+            {params.row.isAvailable ? "available" : "paused"}
+          </span>
+        </span>
+      ),
     },
     {
       field: "edit",
       headerName: "Edit",
       sortable: false,
+      minWidth: 85,
       renderCell: (params) => (
-        <div>
-          <Button
-            onClick={async () => {
-              dispatch(getMenuItemById(params.row.id));
-              setOpenforUpdate(true);
-            }}
-          >
-            <Pen />
-          </Button>
-        </div>
+        <button
+          type="button"
+          className="grid-action-btn grid-action-btn--edit"
+          aria-label={`Edit ${params.row.name}`}
+          onClick={async () => {
+            await dispatch(getMenuItemById(params.row.id));
+            setOpenforUpdate(true);
+          }}
+        >
+          <Pen size={17} />
+        </button>
       ),
     },
     {
       field: "remove",
       headerName: "Remove",
       sortable: false,
+      minWidth: 100,
       renderCell: (params) => (
-        <Button onClick={() => removeMenuItem(params.row.id)}>
-          <DeleteIcon color="red" />
-        </Button>
+        <button
+          type="button"
+          className="grid-action-btn grid-action-btn--danger"
+          aria-label={`Remove ${params.row.name}`}
+          onClick={() => removeMenuItem(params.row.id)}
+        >
+          <Trash2 size={17} />
+        </button>
       ),
     },
   ];
@@ -182,27 +241,66 @@ const GetAllMenu = () => {
   };
 
   return (
-    <Grid className="d-flex flex-column gap-3">
-      <Grid className="d-flex justify-content-between">
-        <h3>Menu items</h3>
-        <Grid className="d-flex gap-3">
-          {/* Filter */}
-          {categoryList.length > 0 && !categoryid && (
-            <FormControl fullWidth>
-              <InputLabel id="category-selection">Category</InputLabel>
+    <>
+    {categoryid && (
+      <Button
+        onClick={() => window.history.back()}
+        startIcon={<ArrowLeft size={18} />}
+        variant="outlined"
+        sx={{
+          alignSelf: "flex-start",
 
+    borderRadius: "14px",
+
+    textTransform: "none",
+
+    fontWeight: 700,
+
+    px: 2.2,
+    py: 1,
+
+    color: "#f97316",
+
+    borderColor: "#fed7aa",
+
+    background: "#fff7ed",
+
+    transition: "all 0.25s ease",
+
+    "&:hover": {
+      background: "#ffedd5",
+      borderColor: "#fb923c",
+
+      transform:
+        "translateX(-2px)",
+    },
+  }}
+>
+  Back
+</Button>)}
+      <div className="dashboard-toolbar">
+        
+        <div>
+          <h3 className="foody-section-title">Menu items</h3>
+          <p className="foody-muted">
+            Keep dishes searchable, priced, and ready for customers.
+          </p>
+        </div>
+
+        <div className="dashboard-actions menu-management-actions">
+          {categoryList.length > 0 && !categoryid && (
+            <FormControl size="small" sx={{ minWidth: 170 }}>
+              <InputLabel id="category-selection">Category</InputLabel>
               <Select
                 id="category-selection"
                 label="Category"
-                defaultValue=""
+                value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="w-100"
+                sx={{ backgroundColor: "#fff", borderRadius: "8px" }}
               >
-                <MenuItem id="212jj2" value={null}>
-                  None
-                </MenuItem>
+                <MenuItem value="">All</MenuItem>
                 {categoryList.map((option) => (
-                  <MenuItem id={option.id} value={option.id}>
+                  <MenuItem key={option.id} value={option.id}>
                     {option.name}
                   </MenuItem>
                 ))}
@@ -210,48 +308,62 @@ const GetAllMenu = () => {
             </FormControl>
           )}
 
-          {/* Search */}
           <TextField
-            className="w-100"
-            placeholder="search by name"
+            size="small"
+            placeholder="Search dish"
+            value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            InputProps={{
+              startAdornment: <Search size={16} />,
+            }}
+            sx={{
+              minWidth: 180,
+              "& .MuiOutlinedInput-root": {
+                backgroundColor: "#fff",
+                borderRadius: "8px",
+                gap: 1,
+              },
+            }}
           />
 
           {categoryid ? (
             <Button
-              variant="outlined"
-              color="success"
+              variant="contained"
+              startIcon={<Plus size={17} />}
               onClick={() => setOpenforAdd(true)}
+              sx={{
+                borderRadius: "999px",
+                backgroundColor: "#f97316",
+                fontWeight: 850,
+                "&:hover": { backgroundColor: "#c2410c" },
+              }}
             >
-              <Plus />
-              Add
+              Dish
             </Button>
           ) : (
             <Button
               variant="outlined"
-              color="success"
-              onClick={() => {
-                setOpenForBulkUpload(true);
-              }}
+              startIcon={<Upload size={17} />}
+              onClick={() => setOpenForBulkUpload(true)}
+              sx={{ borderRadius: "999px", color: "#16803c", borderColor: "#16803c" }}
             >
-              <Plus />
               Menu upload
             </Button>
           )}
-        </Grid>
+        </div>
 
-        {/* bulk upload dialogbox */}
         <DialogBox
           open={openForBulkUpload}
           onClose={handleClose}
-          title="bulk upload item"
+          title="Bulk upload items"
+          maxWidth="md"
           component={<BulkMenuAdd close={handleClose} />}
         />
-        {/* add dialogbox */}
         <DialogBox
           open={openforAdd}
           onClose={handleClose}
-          title="add item"
+          title="Add item"
+          maxWidth="sm"
           component={
             <AddMenuItemForm
               fn={addMenu}
@@ -263,57 +375,54 @@ const GetAllMenu = () => {
                 type: "",
                 price: "",
                 category_id: categoryid,
-                isAvailable:1
+                isAvailable: 1,
               }}
             />
           }
         />
-      </Grid>
+      </div>
 
-      <Grid>
-        {/* update dialogbox */}
-        {menuItem && (
-          <DialogBox
-            open={openForUpdate}
-            onClose={handleClose}
-            title="update item"
-            component={
-              <AddMenuItemForm
-                forAdd={false}
-                fn={updateMenu}
-                data={menuItem}
-                close={handleClose}
-              />
-            }
-          />
-        )}
+      {menuItem && (
+        <DialogBox
+          open={openForUpdate}
+          onClose={handleClose}
+          title="Update item"
+          maxWidth="sm"
+          component={
+            <AddMenuItemForm
+              forAdd={false}
+              fn={updateMenu}
+              data={menuItem}
+              close={handleClose}
+            />
+          }
+        />
+      )}
 
-        {/* MenuList */}
+      <div className="foody-table-card">
         <DataGrid
-          rows={menuList}
+          className="foody-data-grid"
+          rows={menuList || []}
           columns={columns}
           initialState={{
-            pagination: { paginationModel: { pageSize: limit, page: page } },
+            pagination: { paginationModel: { pageSize: limit, page } },
           }}
-          pageSizeOptions={[2, 4, 6, 8, 10, { value: totalMenu, label: "All" }]}
+          pageSizeOptions={menuList.length <= 5 ? [5] : [2, 4, 6, 8, 10, { value: totalMenu, label: "All" }]}
           pagination
           loading={loading}
           paginationMode="server"
           rowCount={totalMenu ? totalMenu : 5}
           onPaginationModelChange={setPagination}
           disableRowSelectionOnClick
+          disableColumnFilter
+          disableColumnMenu
+          disableColumnResize
+          rowHeight={64}
+          sx={FOODY_DATA_GRID_SX}
         />
-      </Grid>
-      {/* Error Text */}
-      {error && (
-        <CustomSnackbar
-          type="error"
-          variant="filled"
-          open={open}
-          message={error.message}
-        />
-      )}
-    </Grid>
+      </div>
+
+    </>
   );
 };
 

@@ -1,17 +1,26 @@
-import { useEffect } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UserPen } from "lucide-react";
-import { Button, CircularProgress, Grid } from "@mui/material";
+import {
+  Button,
+  CircularProgress,
+  Grid,
+} from "@mui/material";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+
 import TextInput from "../components/InputFields/TextInput";
-import { email_Regrex, name_regrex, phone_regrex } from "../constant";
+import {
+  country_optins,
+  email_Regrex,
+  name_regrex,
+  phone_regrex,
+} from "../constant";
+import AutoComplete from "../components/InputFields/AutoComplete";
 import CustomButton from "../components/InputFields/CustomButton";
 import { useDispatch, useSelector } from "react-redux";
 import { updateProfile } from "../store/slices/userSlice";
 import AFormProvider from "../components/FormProvider";
-import CustomSnackbar from "../components/CustomSnackbar";
 
 const schema = yup
   .object({
@@ -19,15 +28,36 @@ const schema = yup
       .string()
       .typeError("name is required")
       .required("Name is required")
-      .matches(name_regrex, "enter a valid name"),
-    gender: yup.string().typeError("gender is required").oneOf(["male", "female", "other"]).required("select a gender"),
-    country: yup.string().typeError("country is required").required("select a country"),
-    address: yup.string().typeError("address is required").required("address a country"),
+      .matches(
+        name_regrex,
+        "enter a valid name",
+      ),
+
+    gender: yup
+      .string()
+      .typeError("gender is required")
+      .oneOf(["male", "female", "other"])
+      .required("select a gender"),
+
+    country: yup
+      .string()
+      .typeError("country is required")
+      .required("select a country"),
+
+    address: yup
+      .string()
+      .typeError("address is required")
+      .required("address is required"),
+
     email: yup
       .string()
       .typeError("email is required")
       .required("email is required")
-      .matches(email_Regrex, "enter a valid email"),
+      .matches(
+        email_Regrex,
+        "enter a valid email",
+      ),
+
     age: yup
       .number()
       .positive()
@@ -35,19 +65,32 @@ const schema = yup
       .integer()
       .required("please enter your age")
       .max(120, "enter a valid age"),
+
     phone: yup
       .string()
-      .typeError("contact number is required")
-      .matches(phone_regrex, "please enter valid contact number")
-      .required("please enter your Contact Number")
+      .typeError(
+        "contact number is required",
+      )
+      .matches(
+        phone_regrex,
+        "please enter valid contact number",
+      )
+      .required(
+        "please enter your Contact Number",
+      )
       .length(10),
   })
   .required();
 
 const ProfilePage = ({ close }) => {
-  const [readOnly, setReadOnly] = useState(true);
+  const [readOnly, setReadOnly] =
+    useState(true);
+
   const [file, setFile] = useState(null);
-  const [open, setOpen] = useState(false);
+
+  const [previewImage, setPreviewImage] =
+  useState(null);
+
   const dispatch = useDispatch();
 
   const {
@@ -55,185 +98,286 @@ const ProfilePage = ({ close }) => {
     control,
     reset,
     formState: { errors },
-  } = useForm({ resolver: yupResolver(schema), disabled: readOnly });
+  } = useForm({
+    resolver: yupResolver(schema),
+    disabled: readOnly,
+  });
 
-  const { user, error, loading } = useSelector((state) => state.users);
-  
-  useEffect(() => {
-    if (error) {
-      setOpen(true);
-      setTimeout(() => {
-        setOpen(false);
-      }, 2000);
-    }
-  }, [error]);
+  const { user, loading } =
+    useSelector((state) => state.users);
 
   useEffect(() => {
     if (!user) return;
+
     reset(user);
-  }, [user]);
+  }, [user, reset]);
 
   const onSubmit = async (data) => {
-    
     const formData = new FormData();
-    if (file) formData.append("user_image", file);
 
-    for (let key in data) {
-      if(key=='role') continue
-      formData.append(`${key}`, data[key]);
+    if (file) {
+      formData.append("user_image", file);
     }
 
-    const result = await dispatch(updateProfile(formData));
-    if (result) setReadOnly((pre) => !pre);
+    for (let key in data) {
+      if (key === "role") continue;
 
-    if (result.payload?.success) close();
+      formData.append(key, data[key]);
+    }
+
+    const result = await dispatch(
+      updateProfile(formData),
+    );
+
+    if (result) {
+      setReadOnly((prev) => !prev);
+    }
+
+    if (result.payload?.success) {
+      close();
+    }
   };
 
   return (
-    // main container
-    <div>
-      {user 
-      ? (
-        <Grid className="d-flex justify-content-center p-5 align-items-start gap-3">
-      {/* left part */}
-      <Grid className="d-flex flex-column gap-3">
-        <Grid
-          size={{ md: 12 }}
-          className="d-flex justify-content-center align-items-center "
-          width="110px"
-        >
-          <Grid>
-            {!readOnly && (
-              <input
-                type="file"
-                name="user_image"
-                accept="image/*"
-                onChange={(e) => setFile(e.target.files[0])}
-              />
-            )}
-            {/* { !readOnly &&  <TextInput type='file' name='user_image' control={control} error={errors} ></TextInput> } */}
+    <div className="profile-page">
+      {user ? (
+        <div className="profile-card">
+          <div className="profile-header">
+            <div className="profile-top-section">
+              <div className="profile-avatar-wrapper">
+                {previewImage ? (
+  <img
+    src={previewImage}
+    alt="Preview"
+    className="profile-avatar"
+  />
+) : user?.user_image ? (
+  <img
+    src={`${import.meta.env.VITE_Image_URL}/${user?.user_image}`}
+    alt="User"
+    className="profile-avatar"
+  />
+) : (
+  <div className="profile-avatar-fallback">
+    {user?.name
+      ?.split(" ")
+      ?.map((word) => word[0])
+      ?.join("")
+      ?.slice(0, 2)
+      ?.toUpperCase()}
+  </div>
+)}
 
-            {readOnly && (
-              <img
-                src={
-                  user?.user_image
-                    ? `http://192.168.1.156:8000/${user?.user_image}`
-                    : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-                }
-                alt="user Img"
-                width="50px"
-              />
-            )}
-          </Grid>
-        </Grid>
+                {!readOnly && (
+                  <>
+                    <label
+                      htmlFor="profile-upload"
+                      className="profile-edit-btn"
+                    >
+                      <UserPen size={16} />
+                    </label>
 
-        <AFormProvider onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={2} className="d-flex flex-column">
-            <Grid>
-              <TextInput
-                name="name"
-                readOnly={readOnly}
-                control={control}
-                error={errors}
-                type="text"
-              />
-            </Grid>
-            <Grid>
-              <TextInput
-                name="age"
-                readOnly={readOnly}
-                control={control}
-                error={errors}
-                type="number"
-              />
-            </Grid>
-            <Grid>
-              <TextInput
-                name="email"
-                readOnly={readOnly}
-                control={control}
-                error={errors}
-                type="text"
-              />
-            </Grid>
-            <Grid>
-              <TextInput
-                name="address"
-                readOnly={readOnly}
-                control={control}
-                error={errors}
-                type="text"
-              />
-            </Grid>
-            <Grid>
-              <TextInput
-                name="phone"
-                readOnly={readOnly}
-                control={control}
-                error={errors}
-                type="number"
-              />
-            </Grid>
+                    <input
+                      id="profile-upload"
+                      type="file"
+                      name="user_image"
+                      accept="image/*"
+                      hidden
+                      onChange={(e) => {
+  const selectedFile =
+    e.target.files[0];
 
-            <Grid>
-              <TextInput
-                name="gender"
-                readOnly={readOnly}
-                control={control}
-                error={errors}
-                type="text"
-              />
-            </Grid>
+  if (selectedFile) {
+    setFile(selectedFile);
 
-            <Grid>
-              <TextInput
-                name="country"
-                readOnly={readOnly}
-                control={control}
-                error={errors}
-                type="text"
-              />
-            </Grid>
-
-            {!readOnly && (
-              <Grid>
-                {!loading ? (
-                  <CustomButton color="blue" name="Update" variant="outlined" />
-                ) : (
-                  <Button size="small" color="primary" variant="contained">
-                    <CircularProgress color="white" size="25px" />
-                    <div className="px-2 py-1">Updating</div>
-                  </Button>
+    setPreviewImage(
+      URL.createObjectURL(selectedFile),
+    );
+  }
+}}
+                    />
+                  </>
                 )}
-              </Grid>
-            )}
-          </Grid>
-        </AFormProvider>
+              </div>
 
-        {/* Error Text */}
-        {error && (
-          <CustomSnackbar
-            type="error"
-            variant="filled"
-            open={open}
-            message={error.message}
-          />
-        )}
-      </Grid>
+              <div className="profile-user-details">
+                <h2>{user?.name}</h2>
+                <p>{user?.email}</p>
+              </div>
+            </div>
 
-      <Grid>
-        <Button onClick={() => setReadOnly((pre) => !pre)}>
-          <UserPen />
-        </Button>
-      </Grid>
+            {readOnly && <Button
+              className="profile-main-edit-btn"
+              onClick={() =>
+                setReadOnly((prev) => !prev)
+              }
+            >
+              <UserPen size={18} />
+Edit Profile
+            </Button>}
+          </div>
+
+          <AFormProvider
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            {!readOnly && (
+  <Grid
+    container
+    spacing={2}
+    alignItems="center"
+    sx={{ mt: 1 }}
+  >
+    <Grid>
+      <Button
+        variant="outlined"
+        startIcon={<UserPen size={18} />}
+        onClick={() =>
+          setReadOnly((prev) => !prev)
+        }
+        sx={{
+          borderRadius: "12px",
+          textTransform: "none",
+          fontWeight: 700,
+          px: 2.5,
+          py: 1,
+          borderColor: "#fed7aa",
+          color: "#f97316",
+          backgroundColor: "#fff7ed",
+          "&:hover": {
+            borderColor: "#fdba74",
+            backgroundColor: "#ffedd5",
+          },
+        }}
+      >
+        Cancel
+      </Button>
     </Grid>
-      )
-    : (
-      <div className="p-5 d-flex flex-column text-secondary justify-content-center align-items-center gap-3"  >
-        <CircularProgress/>
-        <h5>Loading user profile</h5>
-      </div>
-    ) }
+
+    <Grid>
+      {!loading ? (
+        <CustomButton
+          color="blue"
+          name="Update Profile"
+          variant="contained"
+        />
+      ) : (
+        <Button
+          variant="contained"
+          className="or"
+          disabled
+          sx={{
+            borderRadius: "12px",
+            textTransform: "none",
+            px: 2.5,
+            py: 1,
+          }}
+        >
+          <CircularProgress
+            color="inherit"
+            size="20px"
+          />
+
+          <div className="px-2">
+            Updating
+          </div>
+        </Button>
+      )}
+    </Grid>
+  </Grid>
+)}
+            <Grid
+              container
+              spacing={2}
+              className="profile-form-grid"
+            >
+              {!readOnly && <Grid size={{ xs: 12, md: 6 }}>
+                <TextInput
+                  name="name"
+                  readOnly={readOnly}
+                  control={control}
+                  error={errors}
+                  type="text"
+                />
+              </Grid>}
+
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextInput
+                  name="age"
+                  readOnly={readOnly}
+                  control={control}
+                  error={errors}
+                  type="number"
+                />
+              </Grid>
+
+              {!readOnly &&  <Grid size={{ xs: 12, md: 6 }}>
+                  <TextInput
+                    name="email"
+                    readOnly={readOnly}
+                    control={control}
+                    error={errors}
+                    type="text"
+                  />
+                </Grid>}
+
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextInput
+                  name="phone"
+                  readOnly={readOnly}
+                  control={control}
+                  error={errors}
+                  type="number"
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12 }}>
+                <TextInput
+                  name="address"
+                  readOnly={readOnly}
+                  control={control}
+                  error={errors}
+                  type="text"
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextInput
+                  name="gender"
+                  readOnly={readOnly}
+                  control={control}
+                  error={errors}
+                  type="text"
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12, md: 6 }}>
+                <AutoComplete
+                  name="country"
+                  disabled={readOnly}
+                  control={control}
+                  error={errors}
+                  options={country_optins}
+                 />
+                {/* <TextInput
+                  name="country"
+                  readOnly={readOnly}
+                  control={control}
+                  error={errors}
+                  type="text"
+                /> */}
+              </Grid>
+
+            </Grid>
+          </AFormProvider>
+
+        </div>
+      ) : (
+        <div className="profile-loading">
+          <CircularProgress />
+
+          <h5>Loading user profile</h5>
+        </div>
+      )}
     </div>
   );
 };

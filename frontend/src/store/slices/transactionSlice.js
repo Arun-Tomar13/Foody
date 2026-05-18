@@ -47,6 +47,7 @@ const transactionSlice = createSlice({
       .addCase(topUp.pending, (state) => {
          state.loading = true;
         state.error = null;
+        state.successMessage = null;
       })
       .addCase(topUp.fulfilled, (state, action) => {
         state.loading = false;
@@ -61,15 +62,16 @@ const transactionSlice = createSlice({
           state.error=action.payload
         }
       })
-      .addCase(topUp.rejected, (state) => {
+      .addCase(topUp.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       })
       .addCase(getAllTransactions.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(getAllTransactions.fulfilled, (state, action) => {
-        state.loading = true;
+        state.loading = false;
         if(action.payload.success){
           state.transactionList=action.payload.data.transactions
           if(action.payload.data.transactions.length > 0){
@@ -82,8 +84,9 @@ const transactionSlice = createSlice({
           state.error=action.payload
         }
       })
-      .addCase(getAllTransactions.rejected, (state) => {
-        state.error=action.payload.data
+      .addCase(getAllTransactions.rejected, (state, action) => {
+        state.loading = false;
+        state.error=action.payload
       })
 
       },

@@ -8,13 +8,21 @@ import {
 } from "../../lib/api/userApi";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { startLoading, stopLoading } from "./commonSlice";
-import { toast } from "react-toastify";
 
 const initialState = {
   user: null,
   restaurant_owner_not_have_restaurant:[],
   error: null,
   loading: null,
+};
+
+const authErrorMessages = ["invalid token", "Unauthorized user"];
+
+const isAuthError = (payload) =>
+  authErrorMessages.includes(payload?.message);
+
+const clearStoredAuth = () => {
+  localStorage.removeItem("Bearer");
 };
 
 export const addUser = createAsyncThunk(
@@ -108,7 +116,14 @@ export const updateProfile = createAsyncThunk(
 const UserSlice = createSlice({
   name: "user",
   initialState,
-  reducers: {},
+  reducers: {
+    clearAuthState: (state) => {
+      state.user = null;
+      state.error = null;
+      state.loading = false;
+      clearStoredAuth();
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(addUser.pending, (state) => {
@@ -118,10 +133,10 @@ const UserSlice = createSlice({
       .addCase(addUser.fulfilled, (state, action) => {
         state.loading = false;
         if (!action.payload.success) state.error = action.payload;
-        else toast.success(action.payload.message);
       })
-      .addCase(addUser.rejected, (state) => {
+      .addCase(addUser.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       })
       .addCase(logoutUser.pending, (state) => {
         state.loading = true;
@@ -131,12 +146,24 @@ const UserSlice = createSlice({
         state.loading = false;
         if(action.payload.success){
           state.user=null
-           toast.success(action.payload.message)
+          clearStoredAuth();
         }
-        else state.error = action.payload;
+        else {
+          if (isAuthError(action.payload)) {
+            state.user = null;
+            clearStoredAuth();
+          }
+
+          state.error = action.payload;
+        }
       })
-      .addCase(logoutUser.rejected, (state) => {
+      .addCase(logoutUser.rejected, (state, action) => {
         state.loading = false;
+        if (isAuthError(action.payload)) {
+          state.user = null;
+          clearStoredAuth();
+        }
+        state.error = action.payload;
       })
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
@@ -146,15 +173,15 @@ const UserSlice = createSlice({
         state.loading = false;
         if (action.payload.success) {
           state.user = action.payload.data.updatedUser[0];
-          toast.success(action.payload.message);
           localStorage.setItem(
             "Bearer",
             JSON.stringify(action.payload.data.accessToken),
           );
         } else state.error = action.payload;
       })
-      .addCase(loginUser.rejected, (state) => {
+      .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       })
       .addCase(getProfile.pending, (state) => {
         state.error = null;
@@ -162,12 +189,24 @@ const UserSlice = createSlice({
       })
       .addCase(getProfile.fulfilled, (state, action) => {
         state.loading = false;
-        action.payload.success
-          ? (state.user = action.payload.data[0])
-          : (state.error = action.payload);
+        if (action.payload.success) {
+          state.user = action.payload.data[0];
+        } else {
+          if (isAuthError(action.payload)) {
+            state.user = null;
+            clearStoredAuth();
+          }
+
+          state.error = action.payload;
+        }
       })
-      .addCase(getProfile.rejected, (state) => {
+      .addCase(getProfile.rejected, (state, action) => {
         state.loading = false;
+        if (isAuthError(action.payload)) {
+          state.user = null;
+          clearStoredAuth();
+        }
+        state.error = action.payload;
       })
       .addCase(getRestaurantOwnerWhoNotHaveRestro.pending, (state) => {
         state.error = null;
@@ -180,8 +219,9 @@ const UserSlice = createSlice({
           ? (state.restaurant_owner_not_have_restaurant = action.payload.data)
           : (state.error = action.payload);
       })
-      .addCase(getRestaurantOwnerWhoNotHaveRestro.rejected, (state) => {
+      .addCase(getRestaurantOwnerWhoNotHaveRestro.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       })
       .addCase(updateProfile.pending, (state) => {
         state.error = null;
@@ -191,14 +231,14 @@ const UserSlice = createSlice({
         state.loading = false;
         if (action.payload.success) {
           state.user = action.payload.data[0];
-          toast.success(action.payload.message);
         } else state.error = action.payload;
       })
-      .addCase(updateProfile.rejected, (state) => {
+      .addCase(updateProfile.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       });
   },
 });
 
-export const { createUser, searchUser } = UserSlice.actions;
+export const { clearAuthState } = UserSlice.actions;
 export default UserSlice.reducer;

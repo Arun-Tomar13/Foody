@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addCartItem,
@@ -6,40 +6,55 @@ import {
   deleteAllCartItem,
   getAllCart,
 } from "../../store/slices/cartSlice";
-import { DataGrid } from "@mui/x-data-grid";
-import { DeleteIcon, Minus, Plus } from "lucide-react";
-import { Button, CircularProgress, Grid, MenuItem, Select, Switch } from "@mui/material";
-import { Link, useNavigate } from "react-router-dom";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Divider,
+  FormControl,
+  IconButton,
+  MenuItem,
+  Select,
+  Switch,
+} from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import { createOrder } from "../../store/slices/orderSlice";
 import {
   addAddress,
   getAddressByUserId,
   removeAddressById,
 } from "../../store/slices/addressSlice";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import FormProvider from "../../components/FormProvider";
-import { useState } from "react";
 import TextInput from "../../components/InputFields/TextInput";
-import CustomButton from "../../components/InputFields/CustomButton";
 import { getAllTransactions } from "../../store/slices/transactionSlice";
-import CustomSnackbar from "../../components/CustomSnackbar";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Leaf,
+  MapPin,
+  Minus,
+  Plus,
+  ReceiptText,
+  ShoppingBag,
+  Trash2,
+  Wallet,
+  Wheat,
+} from "lucide-react";
 
 const CartPage = ({ close }) => {
   const dispatch = useDispatch();
-  const { itemList, total, numberOfItems, error } = useSelector(
+  const navigate = useNavigate();
+  const { itemList, total, numberOfItems } = useSelector(
     (state) => state.cart,
   );
-  
-  const { loading } = useSelector(
-    (state) => state.order,
-  );
+  const { loading } = useSelector((state) => state.order);
   const { balance } = useSelector((state) => state.transaction);
   const { addressList } = useSelector((state) => state.address);
   const [curentAddress, setCurentAddress] = useState("");
   const [isAdd, setIsAdd] = useState(false);
-  const [open, setOpen] = useState(false);
 
   const schema = yup
     .object({
@@ -47,111 +62,44 @@ const CartPage = ({ close }) => {
     })
     .required();
 
-  useEffect(() => {
-    if (error) {
-      setOpen(true);
-      setTimeout(() => {
-        setOpen(false);
-      }, 2000);
-    }
-  }, [error]);
-
   const {
     handleSubmit,
     control,
     formState: { errors },
   } = useForm({ resolver: yupResolver(schema) });
 
-  const columns = [
-    {
-      field: "image",
-      headerName: "Image",
-      sortable: false,
-      renderCell: (params) => (
-        <div>
-          <img
-            src={`${import.meta.env.VITE_Image_URL}/${params.row.image}`}
-            className="img-fluid "
-            alt="food Img"
-          />
-        </div>
-      ),
-    },
-    {
-      field: "name",
-      headerName: "Name",
-      sortable: false,
-    },
-    {
-      field: "type",
-      headerName: "type",
-      sortable: false,
-    },
-    {
-      field: "price",
-      headerName: "price",
-      sortable: false,
-    },
-    {
-      field: "remove",
-      headerName: "Remove",
-      sortable: false,
-      renderCell: (params) => (
-        <Button
-          variant="contained"
-          color="warning"
-          onClick={() => dispatch(decreaseCartItem(params.row.id))}
-        >
-          <Minus color="black" />
-        </Button>
-      ),
-    },
-    {
-      field: "quantity",
-      headerName: "quantity",
-      sortable: false,
-    },
-    {
-      field: "add",
-      headerName: "Add",
-      sortable: false,
-      renderCell: (params) => (
-        <Button
-          color="success"
-          variant="contained"
-          onClick={() => dispatch(addCartItem(params.row.item_id))}
-        >
-          <Plus color="black" />
-        </Button>
-      ),
-    },
-  ];
+  const cartSummary = useMemo(() => {
+    const safeBalance = Number(balance || 0);
+    const safeTotal = Number(total || 0);
 
-  const navigate = useNavigate();
+    return {
+      safeBalance,
+      safeTotal,
+      canPay: safeBalance >= safeTotal,
+      topUpAmount: Math.max(safeTotal - safeBalance, 0),
+    };
+  }, [balance, total]);
+
+  useEffect(() => {
+    dispatch(getAllCart());
+    dispatch(getAllTransactions());
+    dispatch(getAddressByUserId());
+  }, [dispatch]);
 
   const handleOrder = async () => {
     const order = await dispatch(createOrder(curentAddress));
 
     if (order.payload?.success) {
       const result = await dispatch(deleteAllCartItem());
-      console.log("result o", result);
 
       if (result.payload?.success) {
-        close();
+        close?.();
         navigate(`/order/${order.payload?.data}`, {
           state: { successful: true },
         });
       }
     }
   };
-
-  useEffect(() => {
-    const fetchAddress = async () => {
-      dispatch(getAllTransactions());
-      const address = await dispatch(getAddressByUserId());
-    };
-    fetchAddress();
-  }, []);
 
   const onSubmitForAddress = async (data) => {
     const result = await dispatch(addAddress(data));
@@ -160,160 +108,298 @@ const CartPage = ({ close }) => {
     }
   };
 
-  const handleAddressDelete = async (data) => {
-    const result = await dispatch(removeAddressById(data));
-    console.log("address delete", result);
+  const handleAddressDelete = async (id) => {
+    await dispatch(removeAddressById(id));
+    if (curentAddress) setCurentAddress("");
+  };
+
+  const handleTopUp = () => {
+    close?.();
+    navigate("/transactions");
+  };
+
+  const handleBrowseMenu = () => {
+    close?.();
+    navigate("/");
   };
 
   return (
-    <div className="p-2 d-flex flex-column justify-content-center">
+    <div className="cart-shell">
       {itemList.length > 0 ? (
-        <div>
-          <div>
-            <Grid container size={12}>
-              {addressList.length > 0 && (
-                <Grid size={6}>
-                  <Select
-                    fullWidth
-                    defaultValue=""
-                    name="address"
-                    label="address"
-                    onChange={(e) => setCurentAddress(e.target.value)}
-                  >
-                    {addressList.map((option) => (
-                      <MenuItem key={option.id} value={option.address}>
-                        <div className="d-flex justify-content-between">
-                          <p>{option.address} </p>
-                          <Button
-                            onClick={() => {
-                              handleAddressDelete(option.id);
-                            }}
-                          >
-                            <DeleteIcon />
-                          </Button>
-                        </div>
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </Grid>
-              )}
-              <Grid size={6}>
-                <Switch
-                  checked={isAdd}
-                  onChange={(e) => setIsAdd(e.target.checked)}
-                />
-                Add address
-              </Grid>
-            </Grid>
-            {isAdd && (
-              <FormProvider onSubmit={handleSubmit(onSubmitForAddress)}>
-                <Grid container spacing={2} size={{ md: 12 }}>
-                  <Grid size={{ md: 6 }}>
-                    <TextInput
-                      type="text"
-                      control={control}
-                      error={errors}
-                      name="address"
-                    />
-                  </Grid>
-                  <Grid size={{ md: 4 }}>
-                    <CustomButton
-                      name="submit"
-                      color="blue"
-                      variant="contained"
-                    />
-                  </Grid>
-                </Grid>
-              </FormProvider>
-            )}
-          </div>
-          {itemList && (
-            <>
-              <DataGrid
-                rows={itemList}
-                columns={columns}
-                initialState={{
-                  pagination: {
-                    paginationModel: {
-                      pageSize: 5,
-                    },
-                  },
-                }}
-                pageSizeOptions={[5]}
-                disableRowSelectionOnClick
-                disableColumnFilter
-                disableColumnMenu
-                disableColumnResize
-              />
-              <Grid container direction='column' justifyContent='center' alignItems='center'>
-                <Grid>total items : {numberOfItems}</Grid> 
-                <Grid>items total: {total}</Grid>
-                {/* <Grid>total discount: {total}</Grid>
-                <Grid>final value: {total}</Grid> */}
-              </Grid>
+        <>
+          <header className="cart-header">
+            <div>
+              <p className="dashboard-eyebrow">Your cart</p>
+              <h2>Review your order</h2>
+              <p className="foody-muted">
+                Choose a delivery address, adjust quantities, and place the
+                order when everything looks right.
+              </p>
+            </div>
+            <div className="cart-header-badge">
+              <ShoppingBag size={16} />
+              {numberOfItems} {numberOfItems === 1 ? "item" : "items"}
+            </div>
+          </header>
 
-              <div className="d-flex justify-content-center">
-                {!curentAddress == "" ? (
-                  balance > total ? (
-                    <div>
-                      {!loading ? (
-                        <Button onClick={handleOrder} variant="contained">
-                          Order Now
-                        </Button>
-                      ) : (
-                        <Button
-                          size="small"
-                          color="primary"
-                          variant="contained"
-                        >
-                          <CircularProgress color="white" size="25px" />
-                          <div className="px-2 py-1">Ordering </div>
-                        </Button>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-black bg-danger bg-opacity-50 rounded px-3 py-1 shadow">
-                      Your balance is low, please
-                      <Button
-                        onClick={() => {
-                          close();
-                          navigate("/transactions");
+          <div className="cart-grid">
+            <section className="cart-panel">
+              <div className="cart-panel-inner">
+                <div className="cart-address-bar">
+                  {addressList.length > 0 ? (
+                    <FormControl fullWidth size="small">
+                      <Select
+                        displayEmpty
+                        value={curentAddress}
+                        name="address"
+                        onChange={(e) => setCurentAddress(e.target.value)}
+                        renderValue={(selected) =>
+                          selected ? (
+                            selected
+                          ) : (
+                            <span className="foody-muted">
+                              Select delivery address
+                            </span>
+                          )
+                        }
+                        sx={{
+                          backgroundColor: "#fff",
+                          borderRadius: "8px",
                         }}
                       >
-                        Top Up ₹{total-balance}
+                        {addressList.map((option) => (
+                          <MenuItem key={option.id} value={option.address}>
+                            <Box
+                              display="flex"
+                              alignItems="center"
+                              justifyContent="space-between"
+                              gap={2}
+                              width="100%"
+                            >
+                              <span>{option.address}</span>
+                              <IconButton
+                                size="small"
+                                aria-label="Remove address"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  handleAddressDelete(option.id);
+                                }}
+                              >
+                                <Trash2 size={16} />
+                              </IconButton>
+                            </Box>
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  ) : (
+                    <div className="cart-address-warning">
+                      <AlertCircle size={16} /> Add an address to continue.
+                    </div>
+                  )}
+
+                  <label className="cart-address-toggle">
+                    <Switch
+                      checked={isAdd}
+                      onChange={(e) => setIsAdd(e.target.checked)}
+                      sx={{
+                        "& .MuiSwitch-switchBase.Mui-checked": {
+                          color: "#f97316",
+                        },
+                        "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
+                          {
+                            backgroundColor: "#f97316",
+                          },
+                      }}
+                    />
+                    Add address
+                  </label>
+                </div>
+
+                {isAdd && (
+                  <FormProvider onSubmit={handleSubmit(onSubmitForAddress)}>
+                    <div className="cart-add-address">
+                      <TextInput
+                        type="text"
+                        control={control}
+                        error={errors}
+                        name="address"
+                      />
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        sx={{
+                          borderRadius: "8px",
+                          backgroundColor: "#2f2926",
+                          "&:hover": { backgroundColor: "#1f1a17" },
+                        }}
+                      >
+                        Save
                       </Button>
-                      to order
-                    </p>
-                  )
-                ) : (
-                  <p className="text-danger bg-warning bg-opacity-25 px-3 py-1 shadow">
-                    Select address to order
-                  </p>
+                    </div>
+                  </FormProvider>
+                )}
+
+                <div className="cart-item-list">
+                  {itemList.map((item) => {
+                    const isVeg = item.type === "veg";
+
+                    return (
+                      <article className="cart-item" key={item.id}>
+                        <div className="cart-item-thumb">
+                          <img
+                            src={`${import.meta.env.VITE_Image_URL}/${item.image}`}
+                            alt={`${item.name} dish`}
+                          />
+                        </div>
+                        <div className="cart-item-details">
+                          <div className="cart-item-title-row">
+                            <h3>{item.name}</h3>
+                            <span
+                              className={
+                                isVeg
+                                  ? "diet-badge diet-badge--veg"
+                                  : "diet-badge diet-badge--nonveg"
+                              }
+                            >
+                              {isVeg ? <Leaf size={12} /> : <Wheat size={12} />}
+                              {isVeg ? "Veg" : "Non-veg"}
+                            </span>
+                          </div>
+                          <div className="cart-item-meta">
+                            <span>Rs. {item.price} each</span>
+                            <span className="cart-line-total">
+                              Line Rs. {item.price * item.quantity}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="cart-quantity" aria-label="Quantity">
+                          <IconButton
+                            size="small"
+                            onClick={() => dispatch(decreaseCartItem(item.id))}
+                            aria-label={`Decrease ${item.name}`}
+                          >
+                            <Minus size={16} />
+                          </IconButton>
+                          <strong>{item.quantity}</strong>
+                          <IconButton
+                            size="small"
+                            onClick={() => dispatch(addCartItem(item.item_id))}
+                            aria-label={`Increase ${item.name}`}
+                          >
+                            <Plus size={16} />
+                          </IconButton>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </div>
+            </section>
+
+            <aside className="cart-panel cart-summary">
+              <div className="cart-panel-inner cart-summary-card">
+                <div className="operator-chip">
+                  <ReceiptText size={16} />
+                  Order summary
+                </div>
+                <Divider sx={{ my: 2 }} />
+                <div className="summary-line">
+                  <span>Items</span>
+                  <strong>{numberOfItems}</strong>
+                </div>
+                <div className="summary-line">
+                  <span>Food total</span>
+                  <strong>Rs. {cartSummary.safeTotal}</strong>
+                </div>
+                <div className="summary-line">
+                  <span>Delivery</span>
+                  <strong>Free</strong>
+                </div>
+                <div className="summary-line">
+                  <span>
+                    <Wallet size={15} /> Wallet balance
+                  </span>
+                  <strong>Rs. {cartSummary.safeBalance}</strong>
+                </div>
+                <div className="summary-total">
+                  <span>To pay</span>
+                  <strong>Rs. {cartSummary.safeTotal}</strong>
+                </div>
+
+                <Button
+                  fullWidth
+                  disabled={!curentAddress || !cartSummary.canPay || loading}
+                  onClick={handleOrder}
+                  variant="contained"
+                  sx={{
+                    mt: 2,
+                    py: 1.25,
+                    borderRadius: "8px",
+                    backgroundColor: "#f97316",
+                    fontWeight: 900,
+                    "&:hover": { backgroundColor: "#c2410c" },
+                  }}
+                >
+                  {!loading ? (
+                    "Order now"
+                  ) : (
+                    <>
+                      <CircularProgress size={18} sx={{ color: "#fff", mr: 1 }} />
+                      Ordering
+                    </>
+                  )}
+                </Button>
+
+                {!curentAddress && (
+                  <div className="cart-address-warning">
+                    <MapPin size={16} /> Select an address to order.
+                  </div>
+                )}
+
+                {curentAddress && !cartSummary.canPay && (
+                  <div className="cart-balance-warning">
+                    <AlertCircle size={16} /> Wallet is short by Rs.{" "}
+                    {cartSummary.topUpAmount}.
+                    <Button onClick={handleTopUp} sx={{ ml: 1 }}>
+                      Top up
+                    </Button>
+                  </div>
+                )}
+
+                {curentAddress && cartSummary.canPay && (
+                  <div className="cart-ready-note">
+                    <CheckCircle2 size={16} /> Address and wallet are ready.
+                  </div>
                 )}
               </div>
-            </>
-          )}
-        </div>
+            </aside>
+          </div>
+        </>
       ) : (
-        <div className="d-flex flex-column align-items-center">
-          <img
-            src="https://media.istockphoto.com/id/861576608/vector/empty-shopping-bag-icon-online-business-vector-icon-template.jpg?s=612x612&w=0&k=20&c=I7MbHHcjhRH4Dy0NVpf4ZN4gn8FVDnwn99YdRW2x5k0="
-            width="420px"
-            alt="empty cart"
-          />
-          <p className="text-danger px-3 py-1 shadow">
-            cart is empty. Please add items to order
+        <div className="cart-empty">
+          <div className="cart-empty-icon" aria-hidden="true">
+            <ShoppingBag size={42} />
+          </div>
+          <h2 className="foody-section-title">Your cart is empty</h2>
+          <p className="foody-muted">
+            Add a dish from the menu and your order review will appear here.
           </p>
+          <Button
+            variant="contained"
+            onClick={handleBrowseMenu}
+            sx={{
+              mt: 2,
+              borderRadius: "8px",
+              backgroundColor: "#f97316",
+              "&:hover": { backgroundColor: "#c2410c" },
+            }}
+          >
+            Browse menu
+          </Button>
         </div>
       )}
-       {error && (
-          <CustomSnackbar
-            type="error"
-            variant="filled"
-            open={open}
-            message={error.message}
-          />
-        )}
+
     </div>
   );
 };

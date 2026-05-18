@@ -5,44 +5,30 @@ import {
   getAllRestaurant,
   removeRestaurantById,
 } from "../store/slices/restaurantSlice";
-import { Grid, Button, Box } from "@mui/material";
-import { DeleteIcon } from "lucide-react";
-import { useNavigate } from "react-router";
-import { Plus } from "lucide-react";
+import { Button } from "@mui/material";
+import { Eye, Plus, Trash2, Upload } from "lucide-react";
 import { Link } from "react-router";
 import DialogBox from "./InputFields/DialogBox";
 import CreateRestaurantPage from "../pages/Restaurant/CreateRestaurantPage";
 import BulkMenuAdd from "./BulkMenuAdd";
-import CustomSnackbar from "./CustomSnackbar";
+import { FOODY_DATA_GRID_SX } from "../constants/dataGridConfig";
 import AddCategoryInBulk from "./AddCategoryInBulk";
 
 const AllRestaurantList = () => {
   const [openRestaurant, setOpenRestaurant] = useState(false);
   const [openBulkMenu, setOpenBulkMenu] = useState(false);
   const [openBulkCategory, setOpenBulkCategory] = useState(false);
-  const [open, setOpen] = useState(false);
 
   const { restaurantList } = useSelector((state) => state?.restaurant);
-  const error = useSelector((state) => state?.menu?.error);
-  const categoryrror = useSelector((state) => state?.category?.error);
   const dispatch = useDispatch();
 
   const removeRestro = async (id) => {
-    const result = await dispatch(removeRestaurantById(id));
+    await dispatch(removeRestaurantById(id));
   };
-
-    useEffect(() => {
-      if (error || categoryrror ) {
-        setOpen(true);
-        setTimeout(() => {
-          setOpen(false);
-        }, 8000);
-      }
-    }, [error,categoryrror]);
 
   useEffect(() => {
     dispatch(getAllRestaurant());
-  }, []);
+  }, [dispatch]);
 
   const handleClose = () => {
     setOpenRestaurant(false);
@@ -53,142 +39,190 @@ const AllRestaurantList = () => {
   const columns = [
     {
       field: "name",
-      headerName: "Name",
+      headerName: "Restaurant",
       sortable: false,
+      flex: 1,
+      minWidth: 150,
+      renderCell: (params) => (
+        <span className="grid-cell-name">{params.row.name}</span>
+      ),
     },
     {
       field: "type",
       headerName: "Serves",
       sortable: false,
+      minWidth: 110,
     },
     {
       field: "address",
       headerName: "Address",
       sortable: false,
+      flex: 1.2,
+      minWidth: 220,
     },
     {
       field: "isOpen",
       headerName: "Availability",
       sortable: false,
-      renderCell:(params)=> params.row.isOpen ? 'open' : 'close'
+      minWidth: 130,
+      renderCell: (params) => (
+        <span className="grid-status-cell">
+          <span
+            className={`status-pill status-pill--compact ${
+              params.row.isOpen ? "open" : "closed"
+            }`}
+          >
+            {params.row.isOpen ? "open" : "closed"}
+          </span>
+        </span>
+      ),
     },
     {
       field: "openingTime",
-      headerName: "Opens at",
+      headerName: "Opens",
       sortable: false,
+      minWidth: 105,
     },
     {
       field: "closingTime",
-      headerName: "Closes at",
+      headerName: "Closes",
       sortable: false,
+      minWidth: 105,
     },
     {
       field: "rating",
       headerName: "Rating",
       sortable: false,
+      minWidth: 90,
     },
-
     {
-      field: "delete",
-      headerName: "Remove",
+      field: "view",
+      headerName: "Details",
       sortable: false,
+      minWidth: 120,
       renderCell: (params) => (
-        <Button onClick={() => removeRestro(params.row.id)}>
-          <DeleteIcon color="red" />
+        <Button
+          component={Link}
+          to={`/restaurant/${params.row.id}`}
+          size="small"
+          startIcon={<Eye size={15} />}
+          sx={{ color: "#c2410c", fontWeight: 800 }}
+        >
+          View
         </Button>
       ),
     },
     {
-      field: "view",
-      headerName: "see details",
+      field: "delete",
+      headerName: "Remove",
       sortable: false,
+      minWidth: 90,
       renderCell: (params) => (
-        <Link to={`/restaurant/${params.row.id}`}>see details</Link>
+        <button
+          type="button"
+          className="grid-action-btn grid-action-btn--danger"
+          aria-label={`Remove ${params.row.name}`}
+          onClick={() => removeRestro(params.row.id)}
+        >
+          <Trash2 size={17} />
+        </button>
       ),
     },
   ];
 
   return (
-    <Grid container direction="column" spacing={2}>
-      <Grid className="d-flex justify-content-between">
-        <h3>All Restaurant</h3>
+    <>
+      <div className="dashboard-toolbar">
+        <div>
+          <p className="dashboard-eyebrow">Directory</p>
+          <h2 className="foody-section-title">All restaurants</h2>
+          <p className="foody-muted">
+            Scan store status, timings, and owner setup in one table.
+          </p>
+        </div>
 
-        <Grid container spacing={1} >
-
-          {/* Add category in Bulk Button */}
+        <div className="dashboard-actions">
           <Button
             variant="outlined"
-            color="success"
+            startIcon={<Upload size={17} />}
             onClick={() => setOpenBulkCategory(true)}
+            sx={{ borderRadius: "999px", color: "#16803c", borderColor: "#16803c" }}
           >
-            <Plus /> Add Categories
+            Categories
           </Button>
 
-          {/* Add menu in Bulk Button */}
           <Button
             variant="outlined"
-            color="success"
+            startIcon={<Upload size={17} />}
             onClick={() => setOpenBulkMenu(true)}
+            sx={{ borderRadius: "999px", color: "#16803c", borderColor: "#16803c" }}
           >
-            <Plus /> Add Menu Bulk
+            Menu bulk
           </Button>
 
-          {/* Add Restaurant Button */}
           <Button
-            variant="outlined"
-            color="success"
+            variant="contained"
+            startIcon={<Plus size={17} />}
             onClick={() => setOpenRestaurant(true)}
+            sx={{
+              borderRadius: "999px",
+              backgroundColor: "#f97316",
+              fontWeight: 850,
+              "&:hover": { backgroundColor: "#c2410c" },
+            }}
           >
-            <Plus /> Add
+            Restaurant
           </Button>
-        </Grid>
+        </div>
 
-        {/*Bulk Category Upload Dialog Box  */}
         <DialogBox
           open={openBulkCategory}
           onClose={handleClose}
-          title="upload CSV file"
+          title="Upload CSV file"
+          maxWidth="md"
           component={<AddCategoryInBulk close={handleClose} />}
         />
 
-        {/*Bulk Menu Upload Dialog Box  */}
         <DialogBox
           open={openBulkMenu}
           onClose={handleClose}
-          title="upload CSV file"
+          title="Upload CSV file"
+          maxWidth="md"
           component={<BulkMenuAdd close={handleClose} />}
         />
 
-        {/*Add Restaurant Dialog Box */}
         <DialogBox
           open={openRestaurant}
           onClose={handleClose}
-          title="add Restaurant"
+          title="Add restaurant"
+          maxWidth="sm"
           component={<CreateRestaurantPage close={handleClose} />}
         />
+      </div>
 
-      </Grid>
-
-      {/* List of All Restaurant */}
-      <DataGrid
-        rows={restaurantList}
-        columns={columns}
-        initialState={{
-          pagination: {
-            paginationModel: {
-              pageSize: 5,
+      <div className="foody-table-card">
+        <DataGrid
+          className="foody-data-grid"
+          rows={restaurantList || []}
+          columns={columns}
+          initialState={{
+            pagination: {
+              paginationModel: {
+                pageSize: 5,
+              },
             },
-          },
-        }}
-        pageSizeOptions={[5]}
-        disableRowSelectionOnClick
-      />
+          }}
+          pageSizeOptions={[5, 10]}
+          disableRowSelectionOnClick
+          disableColumnFilter
+          disableColumnMenu
+          disableColumnResize
+          rowHeight={58}
+          sx={FOODY_DATA_GRID_SX}
+        />
+      </div>
 
-      {/* Error Text */}
-            {(error || categoryrror) && (
-              <CustomSnackbar type='error' variant="filled" open={open} message={error ? error.message : categoryrror.message} />
-            )}
-    </Grid>
+    </>
   );
 };
 

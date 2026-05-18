@@ -1,231 +1,217 @@
-import { Grid, Button, Switch, Box, CircularProgress } from "@mui/material";
+import { Box, Button, CircularProgress, IconButton } from "@mui/material";
 import { useEffect, useState } from "react";
-import FormProvider from "../../components/FormProvider";
-import * as yup from "yup";
-import { Plus, UserPen } from "lucide-react";
+import { ArrowLeft, Clock3, MapPin, Pencil, Plus, Store, UtensilsCrossed } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { useForm } from "react-hook-form";
-import TextInput from "../../components/InputFields/TextInput";
 import {
-  // getRestaurantInfo,
-  updateRestaurant,
   getRestaurantInfoById,
-  changeRestaurantAvailability,
 } from "../../store/slices/restaurantSlice";
 import { useParams } from "react-router";
-import CustomButton from "../../components/InputFields/CustomButton";
 import AllCategories from "../../components/AllCategoriesForm";
 import GetAllMenu from "./GetAllMenu";
 import DialogBox from "../../components/InputFields/DialogBox";
 import CreateRestaurantPage from "./CreateRestaurantPage";
+import EditRestaurantForm from "../../components/EditRestaurantForm";
 
 const RestroOwner = () => {
-  const schema = yup
-    .object({
-      name: yup
-      .string()
-      .typeError("name is required")
-      .required("Name is required"),
-      type: yup
-        .string()
-        .typeError("type is required")
-        .oneOf(["veg", "non-veg", "both"])
-        .required("select a type of hotel"),
-      address: yup.string().typeError("address is required").required("address is required"),
-      openingTime: yup.string().typeError("opening time is required").required("opening time is required"),
-      closingTime: yup.string().typeError("closing time is required").required("closingTime is required"),
-    })
-    .required();
-
-  const [readOnly, setReadOnly] = useState(true);
   const [open, setOpen] = useState(false);
-  const dispatch = useDispatch();
-  const params = useParams();
+  const [openEdit, setOpenEdit] = useState(false);
   const [showCategory, setShowCategory] = useState(false);
+  const dispatch = useDispatch();
+  // const params = useParams();
+  const { id } = useParams();
 
-  const { restaurant,loading,hasRestro } = useSelector((state) => state?.restaurant);
-  const r = useSelector((state) => state?.restaurant);
-
-  console.log(r);
-  
-
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm({ resolver: yupResolver(schema), disabled: readOnly });
+  const { restaurant, loading, hasRestro } = useSelector(
+    (state) => state?.restaurant,
+  );
 
   useEffect(() => {
     const getRestaurantData = async () => {
-      let r;
+      if (id) {
+        await dispatch(getRestaurantInfoById({id }));
+        return;
+      }
 
-      if (params.id)
-        r = await dispatch(getRestaurantInfoById({ id: params.id }));
-      else r = await dispatch(getRestaurantInfoById({}));
-      
+      await dispatch(getRestaurantInfoById({}));
     };
+
     getRestaurantData();
-  }, []);
-
-  useEffect(() => {
-    if (!restaurant) return;
-    reset(restaurant);
-  }, [restaurant]);
-
-  const { id } = useParams();
+  }, [dispatch,id]);
 
   const handleClose = () => {
     setOpen(false);
   };
-console.log(hasRestro);
 
-  const onSubmit = async ({
-    id,
-    name,
-    address,
-    type,
-    openingTime,
-    closingTime,
-  }) => {
-    const payload = { id, name, address, type, openingTime, closingTime };
-
-    const result = await dispatch(updateRestaurant(payload));
-
-    setReadOnly((prev) => !prev);
+  const handleCloseEdit = () => {
+    setOpenEdit(false);
   };
 
+  if (loading && hasRestro === null) {
+    return (
+      <Box
+        minHeight="60vh"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <CircularProgress sx={{ color: "#f97316" }} />
+      </Box>
+    );
+  }
+
   return (
-    <div>
+    <Box className="restaurant-owner-page">
+      {id && (
+      <Button
+        onClick={() => window.history.back()}
+        startIcon={<ArrowLeft size={18} />}
+        variant="outlined"
+        sx={{
+          alignSelf: "flex-start",
+
+    borderRadius: "14px",
+
+    textTransform: "none",
+
+    fontWeight: 700,
+
+    px: 2.2,
+    py: 1,
+
+    color: "#f97316",
+
+    borderColor: "#fed7aa",
+
+    background: "#fff7ed",
+
+    transition: "all 0.25s ease",
+
+    "&:hover": {
+      background: "#ffedd5",
+      borderColor: "#fb923c",
+
+      transform:
+        "translateX(-2px)",
+    },
+  }}
+>
+  Back
+</Button>)}
       {hasRestro ? (
-        <Grid container direction="column" spacing={3} alignItems="center">
-          <Grid border={2} padding={1} borderRadius={5}  container justifyContent='center' alignItems='center' color={restaurant.isOpen ? "green" : "red"} >
-             {restaurant.isOpen ? <span className="border py-1 px-2 rounded-pill border-success" >ON</span> : '' } 
-            <Switch
-              checked={!restaurant.isOpen}
-              color={restaurant.isOpen ? "secondary" : "primary"}
-              onChange={() => dispatch(changeRestaurantAvailability(restaurant.id))}
-            />
-            {!restaurant.isOpen ? <span className="border py-1 px-2 rounded-pill border-danger" >OFF</span> : '' }  
-          </Grid>
-          <Grid size={{ md: 12 }}>
-            <FormProvider onSubmit={handleSubmit(onSubmit)}>
-              <Grid container padding={2} spacing={2}>
-                {/* Name field */}
-                <Grid>
-                  <TextInput
-                    control={control}
-                    name="name"
-                    error={errors}
-                    type="text"
-                  />
-                </Grid>
+        <div className="restaurant-owner-main">
+          <section className="restaurant-owner-hero">
+            <div>
+              <div className="restaurant-hero-heading">
+                <div>
+                  <p className="dashboard-eyebrow">Restaurant control</p>
+                  <h1>{restaurant?.name || "Your restaurant"}</h1>
+                </div>
+                <IconButton
+                  className="restaurant-edit-btn"
+                  aria-label="Edit restaurant details"
+                  onClick={() => setOpenEdit(true)}
+                >
+                  <Pencil size={18} />
+                </IconButton>
+              </div>
+              <p className="foody-muted" style={{ maxWidth: 620 }}>
+                Manage kitchen status, menu items, and categories from one
+                dashboard.
+              </p>
+            </div>
 
-                {/* Address field */}
-                <Grid>
-                  <TextInput
-                    control={control}
-                    name="address"
-                    type="text"
-                    error={errors}
-                  />
-                </Grid>
-
-                {/* Type field */}
-                <Grid>
-                  <TextInput
-                    control={control}
-                    name="type"
-                    type="text"
-                    error={errors}
-                  />
-                </Grid>
-
-                {/* OpeningTime field */}
-                <Grid>
-                  <TextInput
-                    control={control}
-                    name="openingTime"
-                    type="time"
-                    error={errors}
-                  />
-                </Grid>
-
-                {/* ClosingingTime field */}
-                <Grid>
-                  <TextInput
-                    control={control}
-                    name="closingTime"
-                    type="time"
-                    error={errors}
-                  />
-                </Grid>
-
-                {/* ClosingingTime field */}
-                <Grid>
-                  {!readOnly && (
-                    <CustomButton
-                      color="green"
-                      name="submit"
-                      variant="outlined"
-                    />
-                  )}
-                </Grid>
-
-                {/* Toggle button for update */}
-                <Grid>
-                  <Button onClick={() => setReadOnly((prev) => !prev)}>
-                    <UserPen />
-                  </Button>
-                </Grid>
-              </Grid>
-            </FormProvider>
-          </Grid>
-
-          <Grid container direction="column" spacing={2}>
-            <Grid container>
-              <Button
-                onClick={() => setShowCategory(false)}
-                className={`${!showCategory ? "text-secondary shadow bg-dark bg-opacity-10" : "text-black "}`}
+            <div className="restaurant-status-strip">
+              <span className="operator-chip">
+                <Store size={16} />
+                {restaurant?.type || "menu"}
+              </span>
+              <span className="operator-chip">
+                <MapPin size={16} />
+                {restaurant?.address || "Address pending"}
+              </span>
+              <span className="operator-chip">
+                <Clock3 size={16} />
+                {restaurant?.openingTime} - {restaurant?.closingTime}
+              </span>
+              <span
+                className={`status-pill ${restaurant?.isOpen ? "open" : "closed"}`}
               >
-                Menu
-              </Button>
-              <Button
-                onClick={() => setShowCategory(true)}
-                className={`${showCategory ? "text-secondary shadow bg-dark bg-opacity-10" : "text-black "}`}
-              >
-                Category
-              </Button>
-            </Grid>
+                {restaurant?.isOpen ? "open" : "closed"}
+              </span>
+            </div>
+          </section>
 
-            {!showCategory ? (
-              <GetAllMenu />
-            ) : (
-              <AllCategories id={id ? id : null} />
-            )}
-          </Grid>
-        </Grid>
+          <section className="restaurant-dashboard-shell">
+            <div className="dashboard-toolbar">
+
+              <div className="restaurant-tabs">
+                <Button
+                  onClick={() => setShowCategory(false)}
+                  className={`restaurant-tab-button ${
+                    !showCategory ? "active" : ""
+                  }`}
+                  startIcon={<UtensilsCrossed size={16} />}
+                >
+                  Menu
+                </Button>
+                <Button
+                  onClick={() => setShowCategory(true)}
+                  className={`restaurant-tab-button ${
+                    showCategory ? "active" : ""
+                  }`}
+                  startIcon={<Store size={16} />}
+                >
+                  Category
+                </Button>
+              </div>
+            </div>
+
+            <div className="cart-panel-inner">
+              {!showCategory ? <GetAllMenu /> : <AllCategories id={id || null} />}
+            </div>
+          </section>
+
+          <DialogBox
+            open={openEdit}
+            onClose={handleCloseEdit}
+            title="Edit restaurant"
+            maxWidth="sm"
+            component={<EditRestaurantForm close={handleCloseEdit} />}
+          />
+        </div>
       ) : (
-        <Grid spacing={3} container direction='column' justifyContent='center' alignItems='center' >
-          <video width='310px' src="/create_restaurant.mp4" autoPlay loop />
-          Create Restaurant
+        <div className="create-restaurant-empty">
+          <video src="/create_restaurant.mp4" autoPlay loop muted />
+          <div>
+            <p className="dashboard-eyebrow">First setup</p>
+            <h1 className="foody-section-title">Create your restaurant</h1>
+            <p className="foody-muted">
+              Add your store profile once, then start managing menus and
+              categories from the dashboard.
+            </p>
+          </div>
           <Button
-            variant="outlined"
-            color="success"
+            variant="contained"
             onClick={() => setOpen(true)}
+            startIcon={<Plus size={18} />}
+            sx={{
+              borderRadius: "999px",
+              backgroundColor: "#f97316",
+              fontWeight: 850,
+              "&:hover": { backgroundColor: "#c2410c" },
+            }}
           >
-            <Plus /> Create
+            Create
           </Button>
           <DialogBox
             open={open}
             onClose={handleClose}
-            title="add Restaurant"
+            title="Add restaurant"
+            maxWidth="sm"
             component={<CreateRestaurantPage close={handleClose} />}
           />
-        </Grid>
+        </div>
       )}
-    </div>
+    </Box>
   );
 };
 

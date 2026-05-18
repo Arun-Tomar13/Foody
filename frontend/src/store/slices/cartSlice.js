@@ -5,7 +5,6 @@ import {
   decreaseItemInCart,
   deleteAllItemInCart,
 } from "../../lib/api/cartApi";
-import { toast } from "react-toastify";
 
 export const addCartItem = createAsyncThunk(
   "cart/create",
@@ -95,7 +94,6 @@ const cartSlice = createSlice({
         
         state.loading = false;
         if (action.payload.success) {
-          toast.success(action.payload.message,{position:'bottom-left'})
           if (action.payload.data.updated) {
             state.itemList = state.itemList.map((item) => {
               if (item.id == action.payload.data.newCartItem[0].id) {
@@ -112,8 +110,9 @@ const cartSlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(addCartItem.rejected, (state) => {
+      .addCase(addCartItem.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       })
       .addCase(getAllCart.pending, (state) => {
         state.loading = true;
@@ -131,8 +130,9 @@ const cartSlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(getAllCart.rejected, (state) => {
+      .addCase(getAllCart.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       })
       .addCase(deleteAllCartItem.pending, (state) => {
         state.loading = true;
@@ -148,9 +148,9 @@ const cartSlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(deleteAllCartItem.rejected, (state) => {
+      .addCase(deleteAllCartItem.rejected, (state, action) => {
         state.loading = false;
-         state.error = false;
+        state.error = action.payload;
       })
       .addCase(decreaseCartItem.pending, (state) => {
         state.loading = true;
@@ -181,9 +181,9 @@ const cartSlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(decreaseCartItem.rejected, (state) => {
+      .addCase(decreaseCartItem.rejected, (state, action) => {
         state.loading = false;
-         state.error = false;
+        state.error = action.payload;
       });
   },
 });

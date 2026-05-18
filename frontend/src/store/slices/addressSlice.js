@@ -63,6 +63,7 @@ const addressSlice = createSlice({
         state.error = false;
       })
       .addCase(addAddress.fulfilled, (state, action) => {
+        state.loading = false;
         
         if (action.payload.success) {
           state.addressList.push(action.payload.data);
@@ -70,14 +71,16 @@ const addressSlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(addAddress.rejected, (state) => {
+      .addCase(addAddress.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       })
       .addCase(removeAddressById.pending, (state) => {
         state.loading = true;
         state.error = false;
       })
       .addCase(removeAddressById.fulfilled, (state, action) => {
+        state.loading = false;
         if (action.payload.success) {
           state.addressList = state.addressList.filter(
             (item) => item.id != action.payload.data,
@@ -86,22 +89,25 @@ const addressSlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(removeAddressById.rejected, (state) => {
+      .addCase(removeAddressById.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       })
       .addCase(getAddressByUserId.pending, (state) => {
         state.loading = true;
         state.error = false;
       })
       .addCase(getAddressByUserId.fulfilled, (state, action) => {
+        state.loading = false;
         if (action.payload.success) {
           state.addressList = action.payload.data;
         } else {
           state.error = action.payload;
         }
       })
-      .addCase(getAddressByUserId.rejected, (state) => {
+      .addCase(getAddressByUserId.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
       });
   },
 });

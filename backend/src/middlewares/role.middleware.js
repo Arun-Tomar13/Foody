@@ -23,11 +23,11 @@ const checkPermission = (module_id, action_id) => {
 
       // if (role_id == rolesConstant.admin) {next(); return };
 
-      // const isHasPermission = await db(tableConstant.permission).where({
-      //   role_id,
-      //   module_id,
-      //   action_id,
-      // });
+      //   const isHasPermission = await db(tableConstant.permission).where({
+      //     role_id,
+      //     module_id,
+      //     action_id,
+      //   });
 
       // if (isHasPermission.length == 0)
       //   return sendResponse({
@@ -42,7 +42,7 @@ const checkPermission = (module_id, action_id) => {
       return sendResponse({
         res,
         statusCode: StatusCodes.UNAUTHORIZED,
-        message: error.message,
+        message: "Something went wrong while checking permission",
         success: false,
       });
     }

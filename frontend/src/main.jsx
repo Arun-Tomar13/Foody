@@ -6,13 +6,20 @@ import { Provider } from 'react-redux'
 import { store } from './store/store.js'
 import { BrowserRouter } from 'react-router'
 import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 createRoot(document.getElementById('root')).render(
   // <StrictMode>
     <Provider store={store}>
       <BrowserRouter>
         <App />
-        <ToastContainer />
+        <ToastContainer
+          position="bottom-right"
+          autoClose={2500}
+          limit={3}
+          newestOnTop
+          pauseOnFocusLoss={false}
+        />
       </BrowserRouter>
     </Provider>
   // </StrictMode>,

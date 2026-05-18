@@ -7,7 +7,6 @@ import {
   getAllMenuApi,
   BulkMenuAddApi,
 } from "../../lib/api/menuApi";
-import { toast } from "react-toastify";
 
 const initialState = {
   menuList: [],
@@ -116,14 +115,14 @@ const menuSlice = createSlice({
       .addCase(addMenu.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload.success) {
-          toast.success(action.payload.message);
           state.menuList.push(action.payload.data)
           state.totalMenu = state.totalMenu + 1
         } else {
           state.error = action.payload
         }
       })
-      .addCase(addMenu.rejected, (state) => {
+      .addCase(addMenu.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload;
       })
       .addCase(bulkMenuAdd.pending, (state) => {
@@ -132,13 +131,12 @@ const menuSlice = createSlice({
       })
       .addCase(bulkMenuAdd.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload.success) {
-          toast.success(action.payload.message);
-        } else {
+        if (!action.payload.success) {
           state.error = action.payload
         }
       })
       .addCase(bulkMenuAdd.rejected, (state,action) => {
+        state.loading = false;
         state.error = action.payload;
       })
       .addCase(updateMenu.pending, (state) => {
@@ -148,7 +146,6 @@ const menuSlice = createSlice({
       .addCase(updateMenu.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload.success) {
-          toast.success(action.payload.message);
           state.menuList = state.menuList.map((item) => {
             return item.id == action.payload.data[0].id
               ? {
@@ -166,7 +163,8 @@ const menuSlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(updateMenu.rejected, (state) => {
+      .addCase(updateMenu.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload;
       })
       .addCase(removeMenu.pending, (state) => {
@@ -176,7 +174,6 @@ const menuSlice = createSlice({
       .addCase(removeMenu.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload.success) {
-          toast.success(action.payload.message);
           ((state.menuList = state.menuList.filter(
             (item) => item.id != action.payload.data,
           )),
@@ -185,7 +182,8 @@ const menuSlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(removeMenu.rejected, (state) => {
+      .addCase(removeMenu.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload;
       })
       .addCase(getAllMenu.pending, (state) => {
@@ -201,7 +199,8 @@ const menuSlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(getAllMenu.rejected, (state) => {
+      .addCase(getAllMenu.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload;
       })
       .addCase(getMenuItemById.pending, (state) => {
@@ -216,7 +215,8 @@ const menuSlice = createSlice({
           state.error = action.payload;
         }
       })
-      .addCase(getMenuItemById.rejected, (state) => {
+      .addCase(getMenuItemById.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload;
       });
   },

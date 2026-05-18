@@ -54,7 +54,7 @@ const BulkMenuAdd = ({ close }) => {
       ),
     );
 
-    if (result.payload.success) {
+    if (result.payload?.success) {
       close();
     }
   };

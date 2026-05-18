@@ -1,87 +1,127 @@
-import { Button } from "@mui/material";
+import { Button, Paper, Typography } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   generateCSVOdOrders,
   getAllOrder,
-  getOrderItemById,
 } from "../../store/slices/orderSlice";
 import { useNavigate } from "react-router";
-import CustomSnackbar from "../../components/CustomSnackbar";
+import {
+  CalendarDays,
+  Download,
+  IndianRupee,
+  ShoppingBag,
+} from "lucide-react";
 
 const Order = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
 
-  useEffect(()=>{dispatch(getAllOrder())},[])
-
-  const { orderList, total, numberOfItems, downloadLink,error } = useSelector(
+  const { orderList, total, numberOfItems } = useSelector(
     (state) => state.order,
   );
 
-    useEffect(() => {
-      if (error) {
-        setOpen(true);
-        setTimeout(() => {
-          setOpen(false);
-        }, 2000);
-      }
-    }, [error]);
+  useEffect(() => {
+    dispatch(getAllOrder());
+  }, [dispatch]);
+
+  const spendThisMonth = useMemo(() => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+
+    return (orderList || []).reduce((sum, order) => {
+      if (!order?.date) return sum;
+
+      const orderDate = new Date(order.date);
+      if (Number.isNaN(orderDate.getTime())) return sum;
+
+      const isCurrentMonth =
+        orderDate.getFullYear() === year && orderDate.getMonth() === month;
+
+      return isCurrentMonth ? sum + Number(order.total || 0) : sum;
+    }, 0);
+  }, [orderList]);
 
   const columns = [
     {
       field: "date",
-      headerName: "date",
+      headerName: "Date",
+      flex: 1,
+      minWidth: 120,
       sortable: false,
-      width: "110",
-      renderCell: (params) => <div>{params.value.split("T")[0]}</div>,
+      renderCell: (params) => (
+        <span>{params.value.split("T")[0]}</span>
+      ),
     },
     {
       field: "time",
-      headerName: "time",
+      headerName: "Time",
+      flex: 1,
+      minWidth: 120,
       sortable: false,
-      width: "110",
       renderCell: (params) => (
-        <div>{params.row.date.split("T")[1].split(".")[0]}</div>
+        <span>
+          {params.row.date.split("T")[1].split(".")[0]}
+        </span>
       ),
     },
     {
       field: "status",
-      headerName: "status",
+      headerName: "Status",
+      flex: 1,
+      minWidth: 130,
       sortable: false,
+      renderCell: (params) => {
+        const status = String(params.value || "").toLowerCase();
+        const chipClass =
+          status === "delivered"
+            ? "order-chip--delivered"
+            : status === "cancelled"
+              ? "order-chip--cancelled"
+              : "order-chip--pending";
+
+        return (
+          <div className={`order-chip ${chipClass}`}>{status}</div>
+        );
+      },
     },
     {
       field: "name",
-      headerName: "placed_by",
+      headerName: "Placed By",
+      flex: 1,
+      minWidth: 160,
       sortable: false,
     },
     {
       field: "total",
-      headerName: "total price",
+      headerName: "Amount",
+      flex: 1,
+      minWidth: 120,
       sortable: false,
+      renderCell: (params) => <strong>₹{params.value}</strong>,
     },
     {
       field: "address",
-      headerName: "address",
+      headerName: "Address",
+      flex: 1.4,
+      minWidth: 220,
       sortable: false,
     },
     {
       field: "view",
-      headerName: "view order",
+      headerName: "Order",
+      minWidth: 130,
       sortable: false,
-      width: "110",
       renderCell: (params) => (
         <Button
-          color="primary"
           variant="contained"
-          onClick={() => {
-            // dispatch(getOrderItemById(params.row.id));
-            navigate(`/order/${params.row.id}`);
-          }}
+          size="small"
+          className="order-view-btn"
+          onClick={() => navigate(`/order/${params.row.id}`)}
         >
-          details
+          View
         </Button>
       ),
     },
@@ -91,54 +131,96 @@ const Order = () => {
     const result = await dispatch(generateCSVOdOrders());
 
     if (result.payload?.success) {
-      console.log(downloadLink);
-      
       navigate(result.payload.data);
     }
   };
 
   return (
-    <div className="p-2 d-flex flex-column">
-      {orderList && (
-        <div className="d-flex flex-column justify-content-center gap-5">
-          <div className="d-flex justify-content-between align-items-center">
-            <h2 className="text-primary">Your orders</h2>
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={handleDownloadCSV}
-            >
-              Download
-            </Button>
+    <div className="orders-page">
+      <div className="orders-header">
+        <div>
+          <Typography variant="h4" fontWeight={800}>
+            Your Orders
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Track and manage all your food orders
+          </Typography>
+        </div>
+
+        <Button
+          variant="contained"
+          startIcon={<Download size={18} />}
+          onClick={handleDownloadCSV}
+          sx={{
+            borderRadius: "12px",
+            textTransform: "none",
+            backgroundColor: "#f97316",
+            px: 2.5,
+            py: 1.2,
+            fontWeight: 700,
+            "&:hover": { backgroundColor: "#ea580c" },
+          }}
+        >
+          Download CSV
+        </Button>
+      </div>
+
+      <div className="orders-stats">
+        <Paper className="orders-stat-card">
+          <div className="orders-stat-icon">
+            <ShoppingBag size={22} />
           </div>
-          <div className="d-flex flex-column gap-3">
-            <DataGrid
-              rows={orderList}
-              columns={columns}
-              initialState={{
-                pagination: {
-                  paginationModel: {
-                    pageSize: 5,
-                  },
-                },
-              }}
-              pageSizeOptions={[5]}
-              disableRowSelectionOnClick
-              disableColumnFilter
-              disableColumnMenu
-              disableColumnResize
-            />
-            <div className="d-flex justify-content-between">
-              <h4>total orders : {numberOfItems}</h4>
-              <h3>total spend : ₹{total}</h3>
-            </div>
+          <div>
+            <h3>{numberOfItems ?? 0}</h3>
+            <p>Total Orders</p>
+          </div>
+        </Paper>
+
+        <Paper className="orders-stat-card">
+          <div className="orders-stat-icon orders-stat-icon--spend">
+            <IndianRupee size={22} />
+          </div>
+          <div>
+            <h3>₹{total ?? 0}</h3>
+            <p>Total Spend</p>
+          </div>
+        </Paper>
+
+        <Paper className="orders-stat-card">
+          <div className="orders-stat-icon orders-stat-icon--month">
+            <CalendarDays size={22} />
+          </div>
+          <div>
+            <h3>₹{spendThisMonth}</h3>
+            <p>Spend This Month</p>
+          </div>
+        </Paper>
+      </div>
+
+      <Paper className="orders-table-wrapper">
+        <div className="orders-table-head">
+          <div>
+            <h3>Recent Orders</h3>
+            <span>Your food order history</span>
           </div>
         </div>
-      )}
-      {/* Error Text */}
-            {error && (
-              <CustomSnackbar type='error' variant="filled" open={open} message={error.message} />
-            )}
+
+        <DataGrid
+          rows={orderList || []}
+          columns={columns}
+          autoHeight
+          pageSizeOptions={orderList?.length <= 5 ? [5] : [5, 10]}
+          initialState={{
+            pagination: { paginationModel: { pageSize: 5 } },
+          }}
+          disableRowSelectionOnClick
+          disableColumnFilter
+          disableColumnMenu
+          disableColumnResize
+          className="foody-orders-grid"
+        />
+      </Paper>
+
     </div>
   );
 };

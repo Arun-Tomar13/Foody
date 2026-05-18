@@ -42,7 +42,7 @@ const AddCategoryInBulk = ({ close }) => {
     const result = await dispatch(bulkUpload(param.id ? { file: formData, restaurant_id:param.id }: {file: formData}));
     console.log("category bulk result", result);
 
-    if (result.payload.success) {
+    if (result.payload?.success) {
       close();
     }
   };

@@ -8,6 +8,7 @@ import cartReducers from './slices/cartSlice.js'
 import orderReducers from './slices/orderSlice.js'
 import addressReducers from './slices/addressSlice.js'
 import transactionReducers from './slices/transactionSlice.js'
+import { notificationMiddleware } from "./notificationMiddleware.js";
 
 export const store = configureStore({
     reducer:{
@@ -20,5 +21,7 @@ export const store = configureStore({
         order:orderReducers,
         address:addressReducers,
         transaction:transactionReducers
-    }
+    },
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware().concat(notificationMiddleware),
 })
