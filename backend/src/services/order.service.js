@@ -88,10 +88,53 @@ const getItemByOrderId = async (res,order_id)=>{
    }
 }
 
+const getAllOrdersForAdmin = async (res)=>{
+   try {
+      const result = await db(tableConstant.order)
+      .join(tableConstant.user,'users.id','=','orders.placed_by')
+      .distinct('orders.id')
+      .select('orders.id','users.name as name','status','total','orders.address as address','orders.created_at as date')
+      
+      return result
+   } catch (error) {
+      return sendResponse({
+      res,
+      statusCode: StatusCodes.BAD_REQUEST,
+      message: error.message,
+      success: false,
+    });
+   }
+}
+
+const getOrdersForRestaurantOwner = async (res, owner_id)=>{
+   try {
+      // Find orders that contain items from the restaurant owned by owner_id
+      const result = await db(tableConstant.order)
+      .join('order_items', 'orders.id', '=', 'order_items.order_id')
+      .join('menu', 'order_items.item_id', '=', 'menu.id')
+      .join('restaurants', 'menu.restaurant_id', '=', 'restaurants.id')
+      .join('users', 'orders.placed_by', '=', 'users.id')
+      .where('restaurants.owner_id', owner_id)
+      .distinct('orders.id')
+      .select('orders.id','users.name as name','status','total','orders.address as address','orders.created_at as date')
+      
+      return result
+   } catch (error) {
+      return sendResponse({
+      res,
+      statusCode: StatusCodes.BAD_REQUEST,
+      message: error.message,
+      success: false,
+    });
+   }
+}
+
 module.exports = {
     addOrder,
     addOrderItem,
     getAllOrder,
     getOrderById,
-    getItemByOrderId
+    getItemByOrderId,
+    getAllOrdersForAdmin,
+    getOrdersForRestaurantOwner
 }

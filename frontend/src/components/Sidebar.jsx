@@ -31,7 +31,7 @@ const Sidebar = ({
   const isIconOnly = collapsed && !isMobile;
 
   useEffect(() => {
-    if (role === USER_ROLES.customer) dispatch(getAllOrder());
+    if (role) dispatch(getAllOrder());
   }, [dispatch, role]);
 
   const roleLabel = useMemo(() => {
@@ -53,18 +53,14 @@ const Sidebar = ({
             },
           ]
         : []),
-      ...(orders?.length > 0 && role === USER_ROLES.customer
+      ...(orders?.length > 0
         ? [{ to: "/orders", icon: BookCheck, label: "Orders" }]
         : []),
-      ...(role === USER_ROLES.customer
-        ? [
-            {
-              to: "/transactions",
-              icon: BadgeIndianRupee,
-              label: "Wallet",
-            },
-          ]
-        : []),
+      {
+        to: "/transactions",
+        icon: BadgeIndianRupee,
+        label: role === USER_ROLES.customer ? "Wallet" : "Payment Status",
+      },
     ],
     [role, orders?.length],
   );

@@ -22,7 +22,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 
 import { useDispatch } from "react-redux";
 
-import { topUp } from "../../store/slices/transactionSlice";
+import { getAllTransactions } from "../../store/slices/transactionSlice";
+import { createRazorpayOrderApi, verifyRazorpayPaymentApi } from "../../lib/api/transactionAPi";
 
 import FormProvider from "../../components/FormProvider";
 
@@ -70,12 +71,42 @@ const TopUp = ({ close }) => {
   const amount = watch("amount");
 
   const onSubmit = async (data) => {
-    const result = await dispatch(
-      topUp(data),
-    );
-
-    if (result.payload?.success) {
-      close();
+    try {
+      const orderRes = await createRazorpayOrderApi({ amount: data.amount });
+      if (orderRes.data?.success) {
+        const orderData = orderRes.data.data;
+        const options = {
+          key: "rzp_test_SqqpdnlA6jY0qm",
+          amount: orderData.amount,
+          currency: "INR",
+          name: "Foody Wallet",
+          description: "Top up your wallet balance",
+          order_id: orderData.id,
+          handler: async function (response) {
+            try {
+              const verifyRes = await verifyRazorpayPaymentApi({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                amount: data.amount
+              });
+              if (verifyRes.data?.success) {
+                dispatch(getAllTransactions());
+                close();
+              }
+            } catch (err) {
+              console.error("Verification failed", err);
+            }
+          },
+          theme: {
+            color: "#f97316"
+          }
+        };
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      }
+    } catch (err) {
+      console.error("Failed to create order", err);
     }
   };
 
@@ -310,7 +341,7 @@ const TopUp = ({ close }) => {
               >
                 {isSubmitting
                   ? "Processing..."
-                  : "Add Money"}
+                  : "Add Money to Wallet"}
               </Button>
             </Grid>
           </Grid>

@@ -42,6 +42,7 @@ import {
   Trash2,
   Wallet,
   Wheat,
+  X,
 } from "lucide-react";
 
 const CartPage = ({ close }) => {
@@ -140,6 +141,37 @@ const CartPage = ({ close }) => {
               <ShoppingBag size={16} />
               {numberOfItems} {numberOfItems === 1 ? "item" : "items"}
             </div>
+            <IconButton
+            onClick={()=> close?.()}
+            size="small"
+            sx={{
+              width: 38,
+              height: 38,
+
+              borderRadius: "12px",
+
+              background:
+                "#fff7ed",
+
+              border:
+                "1px solid #fed7aa",
+
+              color: "#f97316",
+
+              transition:
+                "all 0.22s ease",
+
+              "&:hover": {
+                background:
+                  "#ffedd5",
+
+                transform:
+                  "rotate(90deg)",
+              },
+            }}
+          >
+            <X size={18} />
+          </IconButton>
           </header>
 
           <div className="cart-grid">

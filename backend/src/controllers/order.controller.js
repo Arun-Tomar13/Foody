@@ -11,6 +11,8 @@ const { writeFileSync } = require("fs");
 // const { readFile, writeFile } = require('fs').promises;
 const path = require("path");
 const  {sendEmail, orderConfirmationTemplate}  = require("../utils/sendEmail");
+const db = require("../config/db.config");
+const { rolesConstant, tableConstant } = require("../utils/constant");
 
 // add cart
 const createOrder = async (req, res) => {
@@ -87,6 +89,59 @@ const createOrder = async (req, res) => {
       }),
     );
 
+    // --- PAYMENT ROUTING LOGIC ---
+    const adminUser = await db(tableConstant.user).where({ role_id: rolesConstant.admin }).first();
+    const adminId = adminUser ? adminUser.id : null;
+
+    if (adminId) {
+      const ownerTotals = {};
+      
+      for (const item of cartItems) {
+        // cartItems has restaurant_id from the join in getAllCartItem
+        const restaurant = await db(tableConstant.restaurant).where({ id: item.restaurant_id }).first();
+        if (restaurant && restaurant.owner_id) {
+          const ownerId = restaurant.owner_id;
+          const itemTotal = item.price * item.quantity;
+          if (!ownerTotals[ownerId]) ownerTotals[ownerId] = 0;
+          ownerTotals[ownerId] += itemTotal;
+        }
+      }
+
+      for (const [ownerId, amount] of Object.entries(ownerTotals)) {
+        const amountNum = Number(amount);
+        const adminCut = amountNum * 0.1; // 10% commission
+        const ownerCut = amountNum - adminCut;
+
+        // Credit Admin Full Amount
+        await transactionService.createTransaction(res, {
+          user_id: adminId,
+          order_id: order[0],
+          credit: amountNum,
+          transaction_type: "commission",
+          transaction_id: `ADM-CR-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        });
+
+        // Debit Admin the Restaurant's Share
+        await transactionService.createTransaction(res, {
+          user_id: adminId,
+          order_id: order[0],
+          debit: ownerCut,
+          transaction_type: "payout",
+          transaction_id: `ADM-DR-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        });
+
+        // Credit Restaurant Owner their share
+        await transactionService.createTransaction(res, {
+          user_id: ownerId,
+          order_id: order[0],
+          credit: ownerCut,
+          transaction_type: "restaurant_payout",
+          transaction_id: `REST-CR-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        });
+      }
+    }
+    // --- END PAYMENT ROUTING LOGIC ---
+
     // const items = await orderService.getItemByOrderId(res,order[0])
 
     const user = await userService.getUserById(res, userId);
@@ -100,12 +155,12 @@ const createOrder = async (req, res) => {
       });
     }
 
-    // await sendEmail(res,
-    //   {sendToEmail:user[0].email,
-    //     subject:'Order Created SucessFully',
-    //     message:`wooh! /n ${user.name} your order of good created successfully`,
-    //     data: orderConfirmationTemplate(order[0],total,cartItems)
-    //   })
+    await sendEmail(res,
+      {sendToEmail:user[0].email,
+        subject:'Order Created SucessFully',
+        message:`wooh! /n ${user.name} your order of good created successfully`,
+        data: orderConfirmationTemplate(order[0],total,cartItems)
+      })
       // console.log("email",emailresult);
 
     return sendResponse({
@@ -127,14 +182,22 @@ const createOrder = async (req, res) => {
 const getOrder = async (req, res) => {
   try {
     const userId = req.user;
+    const roleId = req.role;
 
-    const order = await orderService.getAllOrder(res, userId);
+    let order;
+    if (roleId === rolesConstant.admin) {
+      order = await orderService.getAllOrdersForAdmin(res);
+    } else if (roleId === rolesConstant.restaurant_owner) {
+      order = await orderService.getOrdersForRestaurantOwner(res, userId);
+    } else {
+      order = await orderService.getAllOrder(res, userId);
+    }
 
-    if (order.length == 0) {
+    if (!order) {
       return sendResponse({
         res,
         statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-        message: "order does not exists",
+        message: "Error fetching orders",
         success: false,
       });
     }
@@ -142,7 +205,7 @@ const getOrder = async (req, res) => {
     return sendResponse({
       res,
       statusCode: StatusCodes.OK,
-      message: "successfully get the user profile",
+      message: "successfully get the orders",
       data: order,
     });
   } catch (error) {

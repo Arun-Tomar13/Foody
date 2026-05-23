@@ -95,7 +95,7 @@ function App() {
         <Route
           path="orders"
           element={
-            <ProtectedRoute allowedRoles={[USER_ROLES.customer]}>
+            <ProtectedRoute allowedRoles={[USER_ROLES.customer, USER_ROLES.admin, USER_ROLES.restaurent_owner]}>
               <Order />
             </ProtectedRoute>
           }
@@ -111,7 +111,7 @@ function App() {
         <Route
           path="transactions"
           element={
-            <ProtectedRoute allowedRoles={[USER_ROLES.customer]}>
+            <ProtectedRoute allowedRoles={[USER_ROLES.customer, USER_ROLES.admin, USER_ROLES.restaurent_owner]}>
               <Transaction />
             </ProtectedRoute>
           }

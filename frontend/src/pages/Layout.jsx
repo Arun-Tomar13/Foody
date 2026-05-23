@@ -11,8 +11,8 @@ const Layout = ({ showNavbar = true, showSidebar = true }) => {
   const location = useLocation();
   const viewport = useAppViewport();
 
-  const hasSidebar =
-    showSidebar && user?.role !== USER_ROLES.restaurent_owner;
+  const hasSidebar = true;
+    // showSidebar && user?.role !== USER_ROLES.restaurent_owner;
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);

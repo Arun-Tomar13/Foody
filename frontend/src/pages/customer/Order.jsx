@@ -13,6 +13,7 @@ import {
   IndianRupee,
   ShoppingBag,
 } from "lucide-react";
+import { USER_ROLES } from "../../constant";
 
 const Order = () => {
   const dispatch = useDispatch();
@@ -83,7 +84,7 @@ const Order = () => {
               : "order-chip--pending";
 
         return (
-          <div className={`order-chip ${chipClass}`}>{status}</div>
+          <div className={`order-chip ${chipClass}`}>{role == USER_ROLES.customer ? status : (status == "placed" ? "Delivered" : "pending")}</div>
         );
       },
     },
@@ -135,15 +136,30 @@ const Order = () => {
     }
   };
 
+  const user = useSelector((state) => state?.users?.user);
+  const role = user?.role;
+  const isCustomer = role === USER_ROLES.customer; // Assuming customer is 2 from USER_ROLES or similar
+  // Or better, let's just use text conditionally based on role:
+  const getHeaderTitle = () => {
+    if (role === USER_ROLES.admin) return "Platform Orders";
+    if (role === USER_ROLES.restaurent_owner) return "Restaurant Orders";
+    return "Your Orders";
+  };
+  const getHeaderDesc = () => {
+    if (role === USER_ROLES.admin) return "Monitor all orders across the platform";
+    if (role === USER_ROLES.restaurent_owner) return "Track orders for your restaurant";
+    return "Track and manage all your food orders";
+  };
+
   return (
     <div className="orders-page">
       <div className="orders-header">
         <div>
           <Typography variant="h4" fontWeight={800}>
-            Your Orders
+            {getHeaderTitle()}
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Track and manage all your food orders
+            {getHeaderDesc()}
           </Typography>
         </div>
 
@@ -182,7 +198,7 @@ const Order = () => {
           </div>
           <div>
             <h3>₹{total ?? 0}</h3>
-            <p>Total Spend</p>
+            <p>{role === USER_ROLES.restaurent_owner || role === USER_ROLES.admin ? "Total Revenue" : "Total Spend"}</p>
           </div>
         </Paper>
 
@@ -192,7 +208,7 @@ const Order = () => {
           </div>
           <div>
             <h3>₹{spendThisMonth}</h3>
-            <p>Spend This Month</p>
+            <p>{role === USER_ROLES.restaurent_owner || role === USER_ROLES.admin ? "Revenue This Month" : "Spend This Month"}</p>
           </div>
         </Paper>
       </div>
@@ -201,7 +217,7 @@ const Order = () => {
         <div className="orders-table-head">
           <div>
             <h3>Recent Orders</h3>
-            <span>Your food order history</span>
+            <span>{role === USER_ROLES.restaurent_owner || role === USER_ROLES.admin ? "Recent order history" : "Your food order history"}</span>
           </div>
         </div>
 

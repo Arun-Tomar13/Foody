@@ -113,6 +113,10 @@ const Transaction = () => {
     },
   ];
 
+  const user = useSelector((state) => state?.users?.user);
+  const role = user?.role;
+  const isCustomer = role === 2;
+
   return (
     <div className="transactions-page">
       <div className="transactions-header">
@@ -121,36 +125,37 @@ const Transaction = () => {
             variant="h4"
             fontWeight={800}
           >
-            Wallet & Transactions
+            {role === 1 ? "Platform Revenue" : role === 4 ? "Restaurant Revenue" : "Wallet & Transactions"}
           </Typography>
 
           <Typography
             variant="body1"
             color="text.secondary"
           >
-            Manage your wallet and track
-            transaction history
+            {role === 1 || role === 4 ? "Track your payout history" : "Manage your wallet and track transaction history"}
           </Typography>
         </div>
 
-        <Button
-          variant="contained"
-          startIcon={<Plus size={18} />}
-          onClick={() => setOpen(true)}
-          sx={{
-            borderRadius: "12px",
-            textTransform: "none",
-            backgroundColor: "#f97316",
-            px: 2.5,
-            py: 1.2,
-            fontWeight: 700,
-            "&:hover": {
-              backgroundColor: "#ea580c",
-            },
-          }}
-        >
-          Top Up
-        </Button>
+        {isCustomer && (
+          <Button
+            variant="contained"
+            startIcon={<Plus size={18} />}
+            onClick={() => setOpen(true)}
+            sx={{
+              borderRadius: "12px",
+              textTransform: "none",
+              backgroundColor: "#f97316",
+              px: 2.5,
+              py: 1.2,
+              fontWeight: 700,
+              "&:hover": {
+                backgroundColor: "#ea580c",
+              },
+            }}
+          >
+            Top Up
+          </Button>
+        )}
       </div>
 
       <div className="transactions-stats">
